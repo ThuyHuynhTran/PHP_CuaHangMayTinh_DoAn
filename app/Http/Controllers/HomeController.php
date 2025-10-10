@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MayTinh;
+use App\Models\DienThoai;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 
@@ -14,10 +15,10 @@ class HomeController extends Controller
         // 🔹 PHẦN SẢN PHẨM
         // ===============================
         $limit = 12;
-        $page = $request->get('page', 1);
+        $page = $request->get('page', 1);  // Sử dụng để phân trang
 
         // Lấy sản phẩm có phân trang
-        $products = MayTinh::orderBy('id', 'asc')->paginate($limit, ['*'], 'page', $page);
+        $products = DienThoai::orderBy('id', 'asc')->paginate($limit, ['*'], 'page', $page);
 
         // ===============================
         // 🔹 PHẦN TIN TỨC
@@ -77,8 +78,9 @@ class HomeController extends Controller
         // ===============================
         return view('mainpage_screen', compact('products', 'news'));
     }
-    public function cart() {
-    return view('cart');
-}
 
+    // Phương thức cho giỏ hàng
+    public function cart() {
+        return view('cart');
+    }
 }

@@ -7,13 +7,13 @@
     <div class="product-image" style="flex: 1; text-align: center;">
         <img src="{{ asset('assets/img/' . $product->duong_dan) }}" 
              alt="{{ $product->ten_sp }}" 
-             style="width: 100%; max-width: 400px; border-radius: 10px;">
+             style="width: 80%; max-width: 400px; border-radius: 10px;">
     </div>
 
     <!-- Thông tin chi tiết -->
     <div class="product-info" style="flex: 1;">
         <h1 style="color: #0099cc;">{{ $product->ten_sp }}</h1>
-        <p style="font-size: 20px; color: red; font-weight: bold;">
+        <p style="font-size: 15px; color: red; font-weight: bold;">
             {{ number_format((float) str_replace(',', '', $product->gia), 0, ',', '.') }} ₫
         </p>
         <p><strong>Thương hiệu:</strong> {{ $product->thuong_hieu }}</p>

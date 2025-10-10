@@ -5,12 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MayTinh extends Model
+class DienThoai extends Model
 {
     use HasFactory;
 
-    protected $table = 'may_tinhs'; // Tên bảng trong MySQL
+    // Tên bảng trong database
+    protected $table = 'dien_thoais';
 
+    // Các cột có thể ghi
     protected $fillable = [
         'ten_sp',
         'mo_ta',
@@ -18,12 +20,15 @@ class MayTinh extends Model
         'danh_muc_id',
         'so_luong_kho',
         'thuong_hieu',
-        'vi_xu_ly',
-        'ram',
-        'luu_tru',
-        'kich_thuoc_man_hinh',
+        'he_dieu_hanh',
+        'man_hinh',
+        'camera',
+        'bo_nho_ram',
+        'bo_nho_trong',
+        'pin',
         'mau_sac',
-        'dung_luong_pin',
         'duong_dan',
     ];
+
+    
 }

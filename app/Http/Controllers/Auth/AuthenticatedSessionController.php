@@ -22,15 +22,29 @@ class AuthenticatedSessionController extends Controller
     /**
      * Xử lý đăng nhập
      */
-   public function store(LoginRequest $request): RedirectResponse
-{
-    $request->authenticate();
-    $request->session()->regenerate();
+    public function store(LoginRequest $request): RedirectResponse
+    {
+        // Xác thực người dùng
+        $request->authenticate();
+        $request->session()->regenerate();
 
-    // 👉 Đưa người dùng về trang chủ
-    return redirect()->intended('/');
-}
+        // 🔹 Kiểm tra quyền và điều hướng tương ứng
+        $user = Auth::user();
 
+        if ($user->role === 'admin') {
+            return redirect()->intended('/admin'); // Trang admin
+        }
+
+        if ($user->role === 'user') {
+            return redirect()->intended('/'); // Trang chủ người dùng
+        }
+
+        // Nếu role chưa xác định
+        Auth::logout();
+        return redirect('/login')->withErrors([
+            'email' => 'Tài khoản của bạn chưa được gán quyền truy cập.',
+        ]);
+    }
 
     /**
      * Đăng xuất người dùng
