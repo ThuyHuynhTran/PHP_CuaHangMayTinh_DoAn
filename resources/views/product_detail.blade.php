@@ -1,6 +1,14 @@
 @extends('layouts.main')
 
 @section('content')
+
+
+@if(session('status'))
+    <div style="background:#fff2e6; border-left:5px solid #ff9933; padding:10px 15px; margin:10px; border-radius:5px;">
+        {{ session('status') }}
+    </div>
+@endif
+
 <div class="product-detail-container" style="max-width: 1000px; margin: 50px auto; display: flex; gap: 40px; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
     
     <!-- Ảnh sản phẩm -->
@@ -26,19 +34,26 @@
 
         <div style="margin-top: 25px; display: flex; gap: 15px; flex-wrap: wrap;">
     <!-- Nút Mua ngay -->
-    <a href="#"
-       id="buy-now-btn"
-       style="background-color: #e63946; color: white; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: 0.3s;">
-       🛒 Mua ngay
-    </a>
+    <a href="{{ route('checkout.now', $product->id) }}"
+   style="background-color: #c21b1b; color: white; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: 0.3s;">
+   🛒 Mua ngay
+</a>
 
-    <!-- Nút Thêm vào giỏ hàng -->
-    <button style="background-color: #0099cc; color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
-        + Thêm vào giỏ hàng
-    </button>
+
+    <form action="{{ route('cart.add', $product->id) }}" method="POST">
+    @csrf
+    <button type="submit"
+    style="background-color:#007bbd; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; transition:0.3s;"
+    onmouseover="this.style.backgroundColor='#007bbd';"
+    onmouseout="this.style.backgroundColor='#0099cc';">
+    🛒 Thêm vào giỏ hàng
+</button>
+
+</form>
+
 
     <!-- Nút quay lại -->
-    <a href="{{ route('home') }}" style="color: #007bff; text-decoration: none; align-self: center;">
+    <a href="{{ route('home') }}" style="color: #c21b1b; text-decoration: none; align-self: center;">
         ← Quay lại trang chủ
     </a>
 </div>

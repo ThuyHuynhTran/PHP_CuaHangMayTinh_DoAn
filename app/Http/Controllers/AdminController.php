@@ -9,6 +9,7 @@ class AdminController extends Controller
 {
     public function index()
     {
-        return view('admin.dashboard', ['user' => Auth::user()]);
+        return view('dashboard', ['user' => Auth::user()]);
+
     }
 }

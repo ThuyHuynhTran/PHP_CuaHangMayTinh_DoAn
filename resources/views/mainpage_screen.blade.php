@@ -47,7 +47,7 @@
         @if ($products->hasMorePages())
             <button id="load-more-btn"
                     data-next-page="{{ $products->nextPageUrl() }}"
-                    style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                    style="background-color: #c21b1b; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
                 Xem thêm
             </button>
         @endif

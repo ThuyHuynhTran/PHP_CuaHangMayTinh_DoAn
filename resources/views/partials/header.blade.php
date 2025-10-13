@@ -10,7 +10,7 @@
     <style>
         /* ==== HEADER ==== */
         .header {
-            background: #9de2ff;
+            background: #c21b1b;
             padding: 10px 0;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
@@ -29,7 +29,7 @@
         .logo .tech {
             font-family: 'Playfair Display', serif;
             font-size: 28px;
-            color: #0047ab;
+            color:wheat;
             font-weight: bold;
             text-decoration: none;
         }
@@ -42,8 +42,8 @@
         }
 
         .btn {
-            background: #2d3ee0;
-            color: #fff;
+            background: white;
+            color: black;
             border: none;
             border-radius: 10px;
             padding: 10px 14px;
