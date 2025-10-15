@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -17,7 +18,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role', // Thêm role vào đây
+        'role',
+        'phone',
+        'gender',
+        'birthday',
+        'avatar',
     ];
 
     /**
@@ -31,13 +36,13 @@ class User extends Authenticatable
     /**
      * Các kiểu dữ liệu cần ép kiểu
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'birthday' => 'date',
+    ];
+public function reviews() {
+    return $this->hasMany(Review::class);
+}
 
     /**
      * Kiểm tra vai trò của user
@@ -51,5 +56,17 @@ class User extends Authenticatable
     {
         return $this->role === 'user';
     }
-    
+
+    /**
+     * Lấy đường dẫn đầy đủ đến ảnh đại diện
+     */
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->avatar && Storage::disk('public')->exists($this->avatar)) {
+            return asset('storage/' . $this->avatar);
+        }
+
+        // Trả về ảnh mặc định nếu chưa có avatar
+        return asset('images/default-avatar.png');
+    }
 }

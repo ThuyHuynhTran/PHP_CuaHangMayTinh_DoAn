@@ -41,7 +41,7 @@ body {
 }
 
 .logo .tech {
-    color: #e6faff;
+    color: white;
     font-style: italic;
     text-shadow:
         1px 1px 0 #0074cc,
@@ -122,6 +122,53 @@ body {
 
 .btn:hover {
     background-color: #2233cc;
+}
+#navUserAvatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+/* Giữ nguyên .btn gốc của bạn ở trên */
+
+/* === CHUẨN HOÁ 3 NÚT Ở HEADER === */
+.header .auth-icons {                 /* thanh chứa 3 nút */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header .auth-icons .btn {            /* 3 nút đồng đều */
+  width: 46px;
+  height: 46px;
+  padding: 0;                         /* bỏ padding để icon thật sự giữa */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background-color: white;            /* nếu muốn giữ nền đỏ: đổi lại #c21b1b */
+  color: black;                     /* màu icon khi nền trắng */
+}
+
+/* Icon font-awesome trong 2 nút bên */
+.header .auth-icons .btn i {
+  font-size: 20px;
+  line-height: 1;                     /* tránh lệch dọc */
+}
+
+/* Ảnh avatar ở nút giữa */
+.header .auth-icons #navUserAvatar {
+  width: 24px;                        /* bằng kích thước icon để “đều” */
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;                     /* bỏ khoảng trống baseline */
+}
+
+/* Hover (tuỳ thích) */
+.header .auth-icons .btn:hover {
+  background-color: #2233cc;
+  color: #fff;
 }
 
 
@@ -823,6 +870,120 @@ body {
   line-height: 1.4;
   color: #333;
   padding: 15px;
+}
+/* Styles riêng cho trang profile */
+.profile-container {
+    width: 90%;
+    max-width: 800px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    color: #333; /* Màu chữ tổng thể */
+}
+
+.profile-title {
+    text-align: center;
+    color: #c21b1b;
+    margin-bottom: 30px;
+    font-size: 2.2em;
+    font-weight: bold;
+    font-family: 'Playfair Display', serif; /* Font giống logo */
+}
+
+.profile-form .form-group {
+    margin-bottom: 20px;
+}
+
+.profile-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+.profile-form .form-control,
+.profile-form .form-select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1em;
+    box-sizing: border-box; /* Bao gồm padding và border trong width */
+}
+
+.profile-form .form-control:focus,
+.profile-form .form-select:focus {
+    border-color: #c21b1b;
+    box-shadow: 0 0 0 3px rgba(194, 27, 27, 0.2);
+    outline: none;
+}
+
+.profile-form .btn-primary {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: #c21b1b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.profile-form .btn-primary:hover {
+    background-color: #a61717;
+    transform: translateY(-2px);
+}
+
+.alert-success {
+    background-color: #e6ffed; /* Màu xanh nhạt */
+    color: #1a6e37; /* Màu xanh đậm */
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    font-weight: 500;
+    border: 1px solid #b3e0c6;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    border: 1px solid #f5c6cb;
+}
+
+.alert-danger ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+/* Avatar upload */
+.avatar-upload-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.avatar-upload-section img {
+    border: 3px solid #eee;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 15px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-upload-section input[type="file"] {
+    display: block;
+    margin: 0 auto;
+    width: fit-content; /* Giới hạn chiều rộng input file */
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
 }
 
 

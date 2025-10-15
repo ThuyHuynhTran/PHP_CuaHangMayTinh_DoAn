@@ -16,38 +16,37 @@ class AddressController extends Controller
     }
 
     // Lưu địa chỉ mới (từ popup hoặc trang riêng)
-    public function store(Request $request)
-    {
-        $request->validate([
-            'fullname' => 'required|string|max:100',
-            'phone' => 'required|string|max:15',
-            'address' => 'required|string|max:255',
-        ]);
+   // Trong file: app/Http/Controllers/AddressController.php
 
-        // Nếu chọn "Đặt làm mặc định", hủy mặc định cũ
-        if ($request->has('is_default')) {
-            Address::where('user_id', Auth::id())->update(['is_default' => false]);
-        }
+public function store(Request $request)
+{
+    $request->validate([
+        'fullname' => 'required|string|max:100',
+        'phone'    => 'required|regex:/^[0-9]{9,15}$/',
+        'address'  => 'required|string|max:255',
+    ]);
 
-        $newAddress = Address::create([
-            'user_id'    => Auth::id(),
-            'fullname'   => $request->fullname,
-            'phone'      => $request->phone,
-            'address'    => $request->address,
-            'is_default' => $request->has('is_default'),
-        ]);
-
-        // Trả JSON nếu request là AJAX, ngược lại redirect
-        if ($request->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Đã thêm địa chỉ mới!',
-                'address' => $newAddress
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'Đã thêm địa chỉ mới!');
+    // Nếu chọn "Đặt làm mặc định", hủy mặc định cũ
+    if ($request->has('is_default')) {
+        Address::where('user_id', Auth::id())->update(['is_default' => false]);
     }
+
+    // Tạo địa chỉ mới
+    $newAddress = Address::create([
+        'user_id'    => Auth::id(),
+        'fullname'   => $request->fullname,
+        'phone'      => $request->phone,
+        'address'    => $request->address,
+        'is_default' => $request->has('is_default'),
+    ]);
+
+    // ✅ Luôn trả về phản hồi JSON cho AJAX
+    return response()->json([
+        'success' => true,
+        'message' => 'Đã thêm địa chỉ mới thành công!',
+        'address' => $newAddress
+    ]);
+}
 
     // Trang quản lý địa chỉ (cho phép chọn hoặc xóa)
     public function manage()
@@ -57,15 +56,24 @@ class AddressController extends Controller
     }
 
     // Đặt địa chỉ mặc định
-    public function setDefault($id)
-    {
-        Address::where('user_id', Auth::id())->update(['is_default' => false]);
-        Address::where('id', $id)
-               ->where('user_id', Auth::id())
-               ->update(['is_default' => true]);
+   public function setDefault(Request $request)
+{
+    $addressId = $request->input('address_id');
+    $userId = auth()->id();
 
-        return response()->json(['success' => true, 'message' => 'Đã thay đổi địa chỉ mặc định!']);
+    // Bỏ mặc định cũ
+    Address::where('user_id', $userId)->update(['is_default' => false]);
+
+    // Cập nhật mặc định mới
+    $address = Address::where('user_id', $userId)->where('id', $addressId)->first();
+    if ($address) {
+        $address->is_default = true;
+        $address->save();
+        return response()->json(['success' => true, 'message' => 'Đã đặt địa chỉ mặc định.']);
     }
+    return response()->json(['success' => false, 'message' => 'Không tìm thấy địa chỉ.']);
+}
+
 
     // Xóa địa chỉ
     public function destroy($id)

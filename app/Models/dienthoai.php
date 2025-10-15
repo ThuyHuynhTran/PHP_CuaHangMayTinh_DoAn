@@ -9,10 +9,10 @@ class DienThoai extends Model
 {
     use HasFactory;
 
-    // Tên bảng trong database
+    // 🔹 Tên bảng trong database
     protected $table = 'dien_thoais';
 
-    // Các cột có thể ghi
+    // 🔹 Các cột có thể ghi
     protected $fillable = [
         'ten_sp',
         'mo_ta',
@@ -30,5 +30,24 @@ class DienThoai extends Model
         'duong_dan',
     ];
 
-    
+    /**
+     * 🔹 Quan hệ với bảng Review (1 sản phẩm có nhiều đánh giá)
+     */
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'product_id');
+    }
+
+    /**
+     * 🔹 Quan hệ ngược với bảng DanhMuc (mỗi sản phẩm thuộc 1 danh mục)
+     */
+    public function category()
+    {
+        return $this->belongsTo(DanhMuc::class, 'danh_muc_id');
+    }
+    public function brand()
+{
+    return $this->belongsTo(Brand::class, 'brand_id');
+}
+
 }

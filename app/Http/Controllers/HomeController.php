@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DienThoai;
-
+use App\Models\DanhMuc;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 
@@ -12,13 +12,19 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         // ===============================
-        // 🔹 PHẦN SẢN PHẨM
+        // 🔹 PHẦN SẢN PHẨM CÓ PHÂN TRANG
         // ===============================
         $limit = 12;
-        $page = $request->get('page', 1);  // Sử dụng để phân trang
+        $page = $request->get('page', 1);
 
-        // Lấy sản phẩm có phân trang
         $products = DienThoai::orderBy('id', 'asc')->paginate($limit, ['*'], 'page', $page);
+
+        // ===============================
+        // 🔹 PHẦN DANH MỤC + SẢN PHẨM THEO DANH MỤC
+        // ===============================
+        $categories = DanhMuc::with(['products' => function ($query) {
+            $query->orderBy('id', 'desc')->take(8);
+        }])->get();
 
         // ===============================
         // 🔹 PHẦN TIN TỨC
@@ -76,11 +82,14 @@ class HomeController extends Controller
         // ===============================
         // 🔹 TRẢ VỀ TRANG CHÍNH
         // ===============================
-        return view('mainpage_screen', compact('products', 'news'));
+        return view('mainpage_screen', compact('products', 'news', 'categories'));
     }
 
-    // Phương thức cho giỏ hàng
-    public function cart() {
+    // ===============================
+    // 🔹 GIỎ HÀNG
+    // ===============================
+    public function cart()
+    {
         return view('cart');
     }
 }
