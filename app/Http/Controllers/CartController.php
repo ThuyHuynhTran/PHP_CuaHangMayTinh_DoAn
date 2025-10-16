@@ -7,13 +7,16 @@ use App\Models\DienThoai;
 use App\Models\Address;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Promotion; // 🔹 Bổ sung
+use App\Models\Order;     // 🔹 Bổ sung
+use Carbon\Carbon;        // 🔹 Bổ sung
 
 class CartController extends Controller
 {
     /** 🛒 Thêm sản phẩm vào giỏ hàng */
     public function addToCart(Request $request, $productId)
     {
-        // Yêu cầu đăng nhập
+        // ... (Giữ nguyên code cũ của bạn)
         if (!Auth::check()) {
             if ($request->ajax()) {
                 return response()->json(['success' => false, 'message' => 'Vui lòng đăng nhập để thêm sản phẩm!']);
@@ -24,7 +27,6 @@ class CartController extends Controller
         $user = Auth::user();
         $product = DienThoai::findOrFail($productId);
 
-        // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
         $cartItem = Cart::where('user_id', $user->id)
                         ->where('product_id', $product->id)
                         ->first();
@@ -41,11 +43,9 @@ class CartController extends Controller
             ]);
         }
 
-        // 🔹 Cập nhật số lượng hiển thị trên icon
         $cartCount = Cart::where('user_id', $user->id)->sum('quantity');
         session(['cart_count' => $cartCount]);
 
-        // Trả về JSON nếu request là AJAX
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
@@ -60,6 +60,7 @@ class CartController extends Controller
     /** 🧾 Hiển thị giỏ hàng */
     public function viewCart()
     {
+        // ... (Giữ nguyên code cũ của bạn)
         $cartItems = Cart::with('product')
             ->where('user_id', Auth::id())
             ->orderBy('updated_at', 'desc')
@@ -74,17 +75,6 @@ class CartController extends Controller
         return view('cart', compact('cartItems', 'total'));
     }
 
-    /** 🧾 (Không dùng nữa — session cũ) */
-    public function index()
-    {
-        $cartItems = session()->get('cart', []);
-        $total = collect($cartItems)->sum(function ($item) {
-            return (float) preg_replace('/[^\d.]/', '', $item['product']->gia) * $item['quantity'];
-        });
-
-        return view('cart', compact('cartItems', 'total'));
-    }
-
     /** ✅ Thanh toán các sản phẩm được chọn */
     public function checkoutSelected(Request $request)
     {
@@ -94,9 +84,10 @@ class CartController extends Controller
             return redirect()->route('cart.view')->with('error', 'Vui lòng chọn sản phẩm.');
         }
 
+        $user = Auth::user(); // Lấy user đang đăng nhập
         $selectedItems = Cart::with('product')
             ->whereIn('id', $selectedProductIds)
-            ->where('user_id', Auth::id())
+            ->where('user_id', $user->id)
             ->get();
 
         $total = $selectedItems->sum(function ($item) {
@@ -104,36 +95,37 @@ class CartController extends Controller
             return $price * $item->quantity;
         });
 
-        $addresses = Address::where('user_id', Auth::id())->get();
+        $addresses = Address::where('user_id', $user->id)->get();
 
+        // --- 🔹 BẮT ĐẦU PHẦN CODE BỊ THIẾU 🔹 ---
+        // Lấy danh sách ID các khuyến mãi mà user này ĐÃ SỬ DỤNG
+        $usedPromotionIds = Order::where('user_id', $user->id)
+                                 ->whereNotNull('promotion_id')
+                                 ->pluck('promotion_id')
+                                 ->unique();
+
+        // Lấy các khuyến mãi đang hiệu lực VÀ user CHƯA TỪNG SỬ DỤNG
+        $now = Carbon::now();
+        $activePromotions = Promotion::where('start_date', '<=', $now)
+                                     ->where('end_date', '>=', $now)
+                                     ->whereNotIn('id', $usedPromotionIds)
+                                     ->get();
+        // --- 🔹 KẾT THÚC PHẦN CODE BỊ THIẾU 🔹 ---
+
+        // Trả về view và truyền thêm biến $activePromotions
         return view('checkout', [
             'cartItems' => $selectedItems,
             'total' => $total,
             'addresses' => $addresses,
+            'activePromotions' => $activePromotions, // 🔹 Đã bổ sung biến này
         ]);
     }
 
-    /** 💳 Mua ngay 1 sản phẩm */
-    public function checkoutNow($id)
-    {
-        $product = DienThoai::findOrFail($id);
-
-        $cartItems = collect([
-            (object)[
-                'product' => $product,
-                'quantity' => 1
-            ]
-        ]);
-
-        $total = (float) preg_replace('/[^\d.]/', '', $product->gia);
-        $addresses = Address::where('user_id', Auth::id())->get();
-
-        return view('checkout', compact('cartItems', 'total', 'addresses'));
-    }
 
     /** ❌ Xóa sản phẩm khỏi giỏ hàng */
     public function removeFromCart(Request $request, $id)
     {
+        // ... (Giữ nguyên code cũ của bạn)
         $cartItem = Cart::where('id', $id)->where('user_id', Auth::id())->first();
 
         if (!$cartItem) {
@@ -145,7 +137,6 @@ class CartController extends Controller
 
         $cartItem->delete();
 
-        // Cập nhật lại tổng số lượng giỏ hàng
         $cartCount = Cart::where('user_id', Auth::id())->sum('quantity');
         session(['cart_count' => $cartCount]);
 

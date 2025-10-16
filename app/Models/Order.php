@@ -11,6 +11,8 @@ class Order extends Model
     protected $fillable = [
         'user_id', 'fullname', 'phone', 'address',
         'payment_method', 'status', 'total',
+    'promotion_id',     // Thêm vào đây
+    'discount_amount',
     ];
 
     public function items()

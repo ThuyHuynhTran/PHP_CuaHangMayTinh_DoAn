@@ -4,12 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+// Import Model Notification mới của bạn
+use App\Models\Notification;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    // Đã xóa Notifiable khỏi đây
+    use HasFactory;
 
     /**
      * Các cột được phép gán dữ liệu hàng loạt
@@ -40,9 +42,23 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'birthday' => 'date',
     ];
-public function reviews() {
-    return $this->hasMany(Review::class);
-}
+
+    /**
+     * Lấy tất cả review của người dùng.
+     */
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /**
+     * (THÊM MỚI) Lấy tất cả thông báo của người dùng.
+     * Mối quan hệ này sẽ kết nối đến bảng notifications tùy chỉnh của bạn.
+     */
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class)->latest(); // Dùng latest() để thông báo mới nhất lên đầu
+    }
 
     /**
      * Kiểm tra vai trò của user

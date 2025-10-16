@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\Promotion; // THÊM DÒNG NÀY ĐỂ IMPORT MODEL
+use App\Observers\PromotionObserver; // Bạn cũng cần import cả Observer
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Bây giờ Laravel đã biết Promotion là model nào
+        Promotion::observe(PromotionObserver::class);
     }
 }

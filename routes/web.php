@@ -58,7 +58,10 @@ Route::get('/category/{id}', [CategoryController::class, 'show'])->name('categor
 Route::post('/promotion/subscribe', [PromotionController::class, 'subscribe'])->name('promotion.subscribe');
 Route::get('/notifications', [PromotionController::class, 'notifications'])->name('notifications');
 Route::get('/api/notifications', [PromotionController::class, 'getNotifications']);
+// routes/web.php
 
+
+Route::post('/cart/apply-promotion', [CartController::class, 'applyPromotion'])->name('cart.applyPromotion');
 
 Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.detail');
 use App\Http\Controllers\SearchController;
@@ -139,6 +142,12 @@ Route::middleware('auth')->group(function () {
 */
 Route::post('/checkout/selected', [CartController::class, 'checkoutSelected'])->name('checkout.selected'); 
 Route::post('/checkout/process', [CartController::class, 'processCheckout'])->name('checkout.process'); 
+ // === 🔹 PHẦN SỬA LỖI & HỢP NHẤT 🔹 ===
+    // Route này sẽ hiển thị trang thanh toán cho luồng "Thanh toán từ giỏ hàng"
+    Route::get('/checkout', [CheckoutController::class, 'checkoutNow'])->name('checkout');
+    // Route này sẽ hiển thị trang thanh toán cho luồng "Mua ngay"
+    Route::get('/checkout/{id}', [CheckoutController::class, 'checkoutNow'])->name('checkout.now');
+    // =======================================
 // ✅ Mua ngay 1 sản phẩm
  Route::get('/checkout-now/{id}', [CheckoutController::class, 'checkoutNow'])->name('checkout.now');
 Route::middleware(['auth', 'role:user'])->group(function () {

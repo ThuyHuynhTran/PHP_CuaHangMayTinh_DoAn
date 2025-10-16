@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -27,9 +26,14 @@ class PromotionController extends Controller
         return response()->json(['success' => true, 'message' => 'Đăng ký thành công!']);
     }
 
-    // Lấy danh sách thông báo của người dùng
+    // Lấy danh sách thông báo của người dùng đã đăng nhập
     public function notifications()
     {
+        // Kiểm tra người dùng đã đăng nhập chưa
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
         // Lấy thông báo của người dùng hiện tại
         $notifications = Notification::where('user_id', auth()->id())
                                      ->orderBy('created_at', 'desc')
@@ -74,6 +78,12 @@ class PromotionController extends Controller
     // Lấy danh sách thông báo của người dùng hiện tại (API)
     public function getNotifications()
     {
+        // Kiểm tra người dùng đã đăng nhập chưa
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Chưa đăng nhập'], 401);
+        }
+
+        // Lấy thông báo của người dùng hiện tại
         $notifications = Notification::where('user_id', auth()->id())
                                      ->latest()
                                      ->take(5)
@@ -87,10 +97,13 @@ class PromotionController extends Controller
     {
         $notification = Notification::find($id);
 
+        // Kiểm tra quyền truy cập của người dùng
         if ($notification && $notification->user_id == auth()->id()) {
             $notification->update(['is_read' => true]);
+
+            return redirect()->back()->with('success', 'Đã đánh dấu thông báo là đã đọc!');
         }
 
-        return redirect()->back()->with('success', 'Đã đánh dấu thông báo là đã đọc!');
+        return redirect()->back()->with('error', 'Thông báo không hợp lệ hoặc bạn không có quyền');
     }
 }
