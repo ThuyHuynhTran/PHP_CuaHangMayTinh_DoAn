@@ -15,9 +15,16 @@ use App\Http\Controllers\Auth\{
     ForgotPasswordController,
     ResetPasswordController
 };
+use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\ReviewController;
 use App\Models\DanhMuc;
 use App\Models\DienThoai;
+
+use App\Http\Controllers\ChatController;
+
+Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
+Route::get('/admin/messages', [ChatController::class, 'index'])->middleware(['auth', 'role:admin'])->name('admin.messages');
+
 
 // 🟢 API trả danh mục
 Route::get('/api/categories', function () {
@@ -27,6 +34,19 @@ Route::get('/api/categories', function () {
         'categories' => $danhMucs
     ]);
 });
+use App\Http\Controllers\FaqController;
+
+// Khách xem FAQ
+Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
+
+// Admin quản lý FAQ
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/faqs', [FaqController::class, 'adminIndex'])->name('admin.faq.index');
+    Route::post('/admin/faqs', [FaqController::class, 'store'])->name('admin.faq.store');
+    Route::patch('/admin/faqs/{faq}', [FaqController::class, 'update'])->name('admin.faq.update');
+    Route::delete('/admin/faqs/{faq}', [FaqController::class, 'destroy'])->name('admin.faq.delete');
+});
+
 use App\Http\Controllers\BrandController;
 
 Route::get('/brands', [BrandController::class, 'index']);
@@ -35,6 +55,9 @@ use App\Http\Controllers\CategoryController;
 
 Route::get('/category/{id}', [CategoryController::class, 'show'])->name('category.show');
 
+Route::post('/promotion/subscribe', [PromotionController::class, 'subscribe'])->name('promotion.subscribe');
+Route::get('/notifications', [PromotionController::class, 'notifications'])->name('notifications');
+Route::get('/api/notifications', [PromotionController::class, 'getNotifications']);
 
 
 Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.detail');

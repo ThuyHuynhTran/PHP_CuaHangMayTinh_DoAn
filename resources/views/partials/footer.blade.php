@@ -1,6 +1,31 @@
 <footer class="footer">
   <div class="footer-container">
-    <!-- Cột 1 -->
+    <!-- Cột Đăng ký nhận tin khuyến mãi -->
+    <div class="footer-column promo-box">
+      <h3><i class="fas fa-envelope"></i> ĐĂNG KÝ NHẬN TIN KHUYẾN MÃI</h3>
+      <div class="promo-content">
+        <p class="highlight">Nhận ngay voucher 10%</p>
+        <p class="subtext">Voucher sẽ được gửi sau 24h, chỉ áp dụng cho khách hàng mới</p>
+
+        <form id="promoForm">
+          <label>Email</label>
+          <input type="email" id="promoEmail" placeholder="Nhập email của bạn" required>
+
+          <label>Số điện thoại</label>
+          <input type="tel" id="promoPhone" placeholder="Nhập số điện thoại của bạn">
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="promoAgree" required>
+            <label for="promoAgree">Tôi đồng ý với <a href="#" class="terms-link">điều khoản của Mai Cồ Shop</a></label>
+          </div>
+
+          <button type="submit" class="promo-btn">ĐĂNG KÝ NGAY</button>
+          <p id="promoMsg"></p>
+        </form>
+      </div>
+    </div>
+
+    <!-- Cột 2 -->
     <div class="footer-column">
       <h3>Tổng đài hỗ trợ</h3>
       <ul>
@@ -10,7 +35,7 @@
       </ul>
     </div>
 
-    <!-- Cột 2 -->
+    <!-- Cột 3 -->
     <div class="footer-column">
       <h3>Về công ty</h3>
       <ul>
@@ -21,7 +46,7 @@
       </ul>
     </div>
 
-    <!-- Cột 3 -->
+    <!-- Cột 4 -->
     <div class="footer-column">
       <h3>Thông tin khác</h3>
       <ul>
@@ -32,30 +57,21 @@
       </ul>
     </div>
 
-    <!-- Cột 4 -->
+    <!-- Cột 5 -->
     <div class="footer-column">
       <h3>Website cùng tập đoàn</h3>
       <div class="footer-logos">
-    <a href="https://www.topzone.vn" target="_blank" title="Topzone">
-        <img src="{{ asset('assets/img/topzone.jpg') }}" alt="Topzone">
-    </a>
-    <a href="https://www.dienmayxanh.com" target="_blank" title="Điện máy Xanh">
-        <img src="{{ asset('assets/img/dienmayxanh.jpg') }}" alt="Điện máy Xanh">
-    </a>
-    <a href="https://cellphones.com.vn" target="_blank" title="CellphoneS">
-        <img src="{{ asset('assets/img/cellphone.jpg') }}" alt="CellphoneS">
-    </a>
-    <a href="https://www.thegioididong.com" target="_blank" title="Thế Giới Di Động">
-        <img src="{{ asset('assets/img/tgdd.png') }}" alt="Thế Giới Di Động">
-    </a>
-</div>
+        <a href="#"><img src="{{ asset('assets/img/topzone.jpg') }}" alt="Topzone"></a>
+        <a href="#"><img src="{{ asset('assets/img/dienmayxanh.jpg') }}" alt="Điện máy Xanh"></a>
+        <a href="#"><img src="{{ asset('assets/img/cellphone.jpg') }}" alt="CellphoneS"></a>
+        <a href="#"><img src="{{ asset('assets/img/tgdd.png') }}" alt="TGDD"></a>
+      </div>
 
       <div class="socials">
-        <a href="https://www.google.com/search?sa=X&sca_esv=fa0d648ec49d7a9f&rlz=1C1GCEA_enVN1146VN1146&sxsrf=AE3TifPTN_90Ui7M7iYIWiTkvnygtbrGcA:1759972855325&udm=2&fbs=AIIjpHyNLa7NbKa1H9FnKAJNsjCP-TpdCAm2aY_P75kZYcjM4ke3meoFASGzb_pEpYvNzsOzaUDOqa5vY6XxwayxCZwAQjgtM9yfjbJ01XRSLF0l7hPpb2iE4zPC90njPux3F_t1cKczv0DIgAI4CF4bZHAjYtM38OUly4oLFEttB0rUQ-b3HQIdm1uxw_LGAEOS_KXWNuT5piqeFfDwGDzsNIjDbkETOiref1nVrRJ08rWG3NvsuwJmuFgVL3WSkTc0pZ3hTQzo&q=facebook&ved=2ahUKEwjPrOzm-ZWQAxW-d2wGHaMXGpUQtKgLegQIEBAB&biw=1707&bih=780&dpr=1.13#vhid=UxynysB0743aLM&vssid=mosaic"><i class="fab fa-facebook"></i> 3886.8k Fan</a>
-        <a href="https://www.google.com/search?sca_esv=fa0d648ec49d7a9f&rlz=1C1GCEA_enVN1146VN1146&sxsrf=AE3TifPG_yv1rs1aF3J1jflV2gIYMvyUtQ:1759972898715&udm=39&fbs=AIIjpHyNLa7NbKa1H9FnKAJNsjCP-TpdCAm2aY_P75kZYcjM4tVf0eko6iH6YVl1FTMyow4LeaXbFZBDjBFOIw1WI533jAZ-4hzIvoX-azcnqQoUQmcmjTQ4m0L4aMiUBhMMds_HpOqtiwdgjALEpKE8JMY5015snKj90v1a3HEyqT6GBpZENMNIVefQDRvSEo9jKYtfJG9PVPvlBQ3I6FcX8lgyTlEqlfot9Dn5s2jngKDU2pnXTQPojexvutCZsRI6XmeNvGi7&q=youtube&sa=X&ved=2ahUKEwiS1sT7-ZWQAxUZR2wGHdBNLc0Qs6gLegQIGhAB&biw=1707&bih=780&dpr=1.13"><i class="fab fa-youtube"></i> 875k Đăng ký</a>
-        <a href="https://www.google.com/search?sca_esv=fa0d648ec49d7a9f&rlz=1C1GCEA_enVN1146VN1146&sxsrf=AE3TifON9uMa4b3gwtJCirRruVXwasG1Mw:1759972925400&udm=2&fbs=AIIjpHyNLa7NbKa1H9FnKAJNsjCPuuyZ8axF70qppVREZw12J16j6TEYGEwZz6y4Q0FA_xMYeajm3AQJueG4kgRvMz5mMReb6SOGC537bRPQz-NEwNh19BgY4xKvRx6yrOq8ghQGvIQnv_eexzDjSQxmj9-t7dky81ci09LBYG6EBKZeJbhII21tkR0G9ZxpEDfgGmPo7GvyhOiWZUfPTYLaUx6fJBUO7vPYuO-_157Mk7dIt14XBYQOOIXFc-ZP5NxXGo6yHWM1&q=zalo&sa=X&ved=2ahUKEwjEsaGI-pWQAxUSRWcHHSRtGbkQtKgLegQIFhAB&biw=1707&bih=780&dpr=1.13"><i class="fab fa-zalo"></i> Zalo MCShop</a>
+        <a href="#"><i class="fab fa-facebook"></i> 3886.8k Fan</a>
+        <a href="#"><i class="fab fa-youtube"></i> 875k Đăng ký</a>
+        <a href="#"><i class="fab fa-zalo"></i> Zalo MCShop</a>
       </div>
-    
     </div>
   </div>
 
@@ -63,25 +79,189 @@
     <p>© 2025 Mai Cồ Shop - Thiết bị công nghệ chính hãng.</p>
   </div>
 </footer>
+
+<style>
+.footer {
+  background: #fff;
+  color: #000;
+  font-family: Arial, sans-serif;
+}
+.footer-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 30px;
+  width: 90%;
+  margin: auto;
+  padding: 30px 0;
+  border-top: 1px solid #eee;
+}
+
+/* --- Cột khuyến mãi --- */
+.promo-box {
+  grid-column: 1 / 2; /* ✅ Nằm bên trái */
+  border-right: 1px solid #eee;
+  padding-right: 25px;
+}
+.promo-box h3 {
+  font-size: 17px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.promo-box .highlight {
+  color: #e21b1b;
+  font-weight: bold;
+}
+.promo-box .subtext {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 10px;
+}
+#promoForm label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+#promoForm input[type="email"],
+#promoForm input[type="tel"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #444;
+}
+.checkbox-group input[type="checkbox"] {
+  accent-color: #e21b1b;
+  transform: scale(1.2);
+}
+.checkbox-group a.terms-link {
+  color: #e21b1b;
+  text-decoration: none;
+  font-weight: 500;
+}
+.checkbox-group a.terms-link:hover {
+  text-decoration: underline;
+}
+.promo-btn {
+  width: 100%;
+  background: #e21b1b;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.promo-btn:hover {
+  background: #b91515;
+}
+#promoMsg {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+/* --- Các cột khác --- */
+.footer-column h3 {
+  color: #000;
+  font-size: 17px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+}
+.footer-column ul li {
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+.footer-column ul li a {
+  text-decoration: none;
+  color: #333;
+}
+.footer-column ul li a:hover {
+  color: #e21b1b;
+}
+.footer-logos img {
+  width: 60px;
+  height: 30px;
+  object-fit: contain;
+  margin-right: 6px;
+  border-radius: 4px;
+}
+.footer .socials a {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  text-decoration: none;
+  margin-top: 5px;
+}
+.footer .socials a:hover {
+  color: #e21b1b;
+}
+.footer-bottom {
+  background: #c21b1b;
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+}
+
+/* --- Responsive --- */
+@media (max-width: 1024px) {
+  .footer-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
 <script>
-const categoryBtn = document.querySelector('.category-btn');
-const categoryMenu = document.getElementById('categoryMenu');
-const closeBtn = document.querySelector('.close-btn');
+document.getElementById('promoForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const email = document.getElementById('promoEmail').value.trim();
+  const phone = document.getElementById('promoPhone').value.trim();
+  const msg = document.getElementById('promoMsg');
 
-// Mở menu
-categoryBtn.addEventListener('click', () => {
-  categoryMenu.classList.add('active');
-});
-
-// Đóng menu
-closeBtn.addEventListener('click', () => {
-  categoryMenu.classList.remove('active');
-});
-
-// Click ra ngoài để đóng
-categoryMenu.addEventListener('click', (e) => {
-  if (e.target === categoryMenu) {
-    categoryMenu.classList.remove('active');
+  try {
+    const res = await fetch("{{ route('promotion.subscribe') }}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+      },
+      body: JSON.stringify({ email, phone })
+    });
+    const data = await res.json();
+    if (data.success) {
+      msg.textContent = "🎉 Đăng ký thành công! Cảm ơn bạn ❤️";
+      msg.style.color = "green";
+      document.getElementById('promoForm').reset();
+    } else {
+      msg.textContent = data.message || "Email đã tồn tại hoặc lỗi hệ thống.";
+      msg.style.color = "red";
+    }
+  } catch (err) {
+    msg.textContent = "Lỗi kết nối máy chủ, vui lòng thử lại!";
+    msg.style.color = "red";
   }
 });
 </script>

@@ -216,6 +216,104 @@
             background: #c21b1b;
             color: white;
         }
+/* --- CĂN CHỈNH CHIỀU CAO NÚT MENU TRÁI --- */
+.menu-left .btn,
+#brandBtn {
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    line-height: 1;
+    white-space: nowrap; /* Giữ chữ không bị xuống hàng */
+}
+
+/* Giúp icon và chữ ở giữa hoàn hảo */
+.menu-left .btn i {
+    font-size: 16px;
+    margin-right: 6px;
+    display: inline-block;
+}
+
+/* Đảm bảo chữ trong nút Thương hiệu thẳng hàng với 2 nút còn lại */
+#brandBtn span {
+    display: inline-block;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+/* --- CĂN CHỈNH NHÓM ICON PHẢI --- */
+.menu-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* 4 icon phải có cùng kích thước */
+.menu-right .btn,
+.btn-cart,
+.btn-user,
+.btn-logout {
+    width: 45px;
+    height: 45px;
+    background: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 0;
+}
+
+/* Icon và avatar đều nhau */
+.menu-right .btn i,
+.menu-right .btn img {
+    font-size: 22px;
+    width: 27px;
+    height: 26px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* --- BADGE SỐ TRÒN NHỎ (chuẩn tròn, không bị che) --- */
+#notify-count,
+#cart-count {
+    position: absolute;
+    top: -2px; /* đẩy hẳn ra ngoài nút */
+    right: -2px; /* đẩy ra khỏi góc trắng */
+    background: #ff3333;
+    color: white;
+    font-size: 11px;
+    border-radius: 50%; /* ✅ tròn hoàn toàn */
+    width: 11px; /* chiều rộng cố định để tránh méo */
+    height: 15px; /* chiều cao cố định */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    line-height: 1;
+    z-index: 20; /* đảm bảo nằm trên icon */
+    box-shadow: 0 0 3px rgba(0,0,0,0.25);
+}
+
+/* --- ĐẢM BẢO TẤT CẢ NẰM CÙNG HÀNG --- */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 12px;
+    width: 90%;
+    margin: auto;
+    overflow: visible;
+}
+/* --- CĂN CHỈNH ICON GIỎ HÀNG GIỮA HOÀN HẢO --- */
+.menu-right .btn-cart i {
+    transform: translateY(2px); /* đẩy xuống 1px cho cân giữa */
+    display: inline-block;
+}
+
 
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.9); }
@@ -291,7 +389,13 @@
         </form>
 
         <!-- MENU PHẢI -->
-        <div class="menu-right auth-icons"> <a href="{{ route('cart') }}" class="btn btn-cart" title="Giỏ hàng" style="position: relative;"> <i class="fas fa-shopping-cart"></i> <span id="cart-count" style="position:absolute; top:-5px; right:-2px; background:#ff3333; color:#fff; font-size:12px; border-radius:50%; padding:2px 6px; font-weight:bold; display: {{ session('cart_count', 0) > 0 ? 'inline-block' : 'none' }};"> {{ session('cart_count', 0) }} </span> </a> @guest <a href="{{ route('login') }}" class="btn btn-user" title="Đăng nhập"> <i class="fas fa-user-circle"></i> </a> @else <div style="position: relative;"> <button id="userDropdownBtn" class="btn btn-user" title="Tài khoản của tôi"> @if(Auth::user()->avatar) <img id="navUserAvatar" src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar"> @else <i class="fas fa-user-circle"></i> @endif </button> <div id="userDropdown" style="display:none; position:absolute; right:0; top:50px; background:white; border:1px solid #ddd; border-radius:10px; width:200px; box-shadow:0 4px 10px rgba(0,0,0,0.15); z-index:999;"> <a href="{{ route('profile.edit') }}" style="display:flex; align-items:center; gap:8px; padding:10px 15px; text-decoration:none; color:#333;"> <i class="fas fa-user"></i> Hồ sơ của tôi </a> <a href="{{ route('orders.myorder') }}" style="display:flex; align-items:center; gap:8px; padding:10px 15px; text-decoration:none; color:#333;"> <i class="fas fa-box"></i> Đơn hàng của tôi </a> <a href="{{ route('wishlist.mywishlist') }}" style="display:flex; align-items:center; gap:8px; padding:10px 15px; text-decoration:none; color:#333;"> <i class="fas fa-heart"></i> Yêu thích </a> </div> </div> <form method="POST" action="{{ route('logout') }}"> @csrf <button type="submit" class="btn btn-logout" title="Đăng xuất"> <i class="fas fa-right-from-bracket"></i> </button> </form> @endguest </div> </div>
+         <a href="{{ route('notifications') }}" class="btn btn-cart" title="Thông báo" style="position: relative; ">
+  <i class="fas fa-bell"></i>
+  <span id="notify-count" style="position:absolute;top:-5px;right:-3px;background:#ff3333;color:#fff;font-size:12px;border-radius:50%;padding:2px 6px;font-weight:bold;display:none;">0</span>
+</a>
+
+        <div class="menu-right auth-icons"> <a href="{{ route('cart') }}" class="btn btn-cart" title="Giỏ hàng" style="position: relative;"> <i class="fas fa-shopping-cart"></i>
+         <span id="cart-count" style="position:absolute; top:-5px; right:-2px; background:#ff3333; color:#fff; font-size:12px; border-radius:50%; padding:2px 6px; font-weight:bold; display: {{ session('cart_count', 0) > 0 ? 'inline-block' : 'none' }};"> {{ session('cart_count', 0) }} </span> </a> @guest <a href="{{ route('login') }}" class="btn btn-user" title="Đăng nhập"> <i class="fas fa-user-circle"></i> </a> @else <div style="position: relative;"> <button id="userDropdownBtn" class="btn btn-user" title="Tài khoản của tôi"> @if(Auth::user()->avatar) <img id="navUserAvatar" src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar"> @else <i class="fas fa-user-circle"></i> @endif </button> <div id="userDropdown" style="display:none; position:absolute; right:0; top:50px; background:white; border:1px solid #ddd; border-radius:10px; width:200px; box-shadow:0 4px 10px rgba(0,0,0,0.15); z-index:999;"> <a href="{{ route('profile.edit') }}" style="display:flex; align-items:center; gap:8px; padding:10px 15px; text-decoration:none; color:#333;"> <i class="fas fa-user"></i> Hồ sơ của tôi </a> <a href="{{ route('orders.myorder') }}" style="display:flex; align-items:center; gap:8px; padding:10px 15px; text-decoration:none; color:#333;"> <i class="fas fa-box"></i> Đơn hàng của tôi </a> <a href="{{ route('wishlist.mywishlist') }}" style="display:flex; align-items:center; gap:8px; padding:10px 15px; text-decoration:none; color:#333;"> <i class="fas fa-heart"></i> Yêu thích </a> </div> </div> <form method="POST" action="{{ route('logout') }}"> @csrf <button type="submit" class="btn btn-logout" title="Đăng xuất"> <i class="fas fa-right-from-bracket"></i> </button> </form> @endguest </div> </div>
 
 </header>
 
@@ -445,6 +549,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (userMenu) userMenu.style.display = 'none';
     });
 });
+// === Load thông báo ===
+async function loadNotifications() {
+  try {
+    const res = await fetch('/api/notifications');
+    const data = await res.json();
+    const count = data.notifications.length;
+    const notify = document.getElementById('notify-count');
+    if (count > 0) {
+      notify.textContent = count;
+      notify.style.display = 'inline-block';
+    }
+  } catch (err) {
+    console.error('Lỗi tải thông báo', err);
+  }
+}
+loadNotifications();
+
 </script>
 
 

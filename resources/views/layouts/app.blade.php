@@ -33,9 +33,9 @@
     @endisset
 
     {{-- Page content --}}
-    <main>
-        {{ $slot }}
-    </main>
+   <main>
+    @yield('content')
+</main>
 
     <!-- ===== Nút Liên hệ ===== -->
     <a href="tel:0123456789"
