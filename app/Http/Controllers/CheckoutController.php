@@ -206,11 +206,13 @@ class CheckoutController extends Controller
      * 🔍 Xem chi tiết đơn hàng
      */
     public function show($id)
-    {
-        $order = Order::with('items.product')
-            ->where('user_id', Auth::id())
-            ->findOrFail($id);
-        return view('orders.show', compact('order'));
-    }
+{
+    $order = Order::with(['items.product', 'promotion']) // ✅ load thêm khuyến mãi
+        ->where('user_id', Auth::id())
+        ->findOrFail($id);
+
+    return view('orders.show', compact('order')); // ✅ trỏ về view đúng của bạn
+}
+
 }
 

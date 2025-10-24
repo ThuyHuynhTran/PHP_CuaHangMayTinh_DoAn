@@ -15,9 +15,6 @@ class AuthController extends Controller
      */
     public function showLogin()
     {
-        // ⚠️ Nếu view của bạn nằm ở resources/views/login.blade.php
-        // hãy để return view('login');
-        // Nếu nằm trong thư mục auth/, để view('auth.login');
         return view('auth.login');
     }
 
@@ -34,53 +31,74 @@ class AuthController extends Controller
      */
     public function register(Request $request): RedirectResponse
     {
-        // ✅ Validate input
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        // ✅ Lưu user mới
+        // ✅ Tạo tài khoản mới
         $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']), // tốt hơn bcrypt()
+            'name'     => $data['name'],
+            'email'    => $data['email'],
+            'password' => Hash::make($data['password']),
+            'is_locked' => false,
+            'login_attempts' => 0,
         ]);
 
-        // ✅ Có thể login luôn nếu bạn muốn:
-        // Auth::login($user);
-
-        return redirect()->route('login')->with('status', 'Đăng ký thành công! Hãy đăng nhập.');
+        return redirect()->route('login')
+            ->with('status', 'Đăng ký thành công! Hãy đăng nhập.');
     }
 
     /**
-     * Xử lý đăng nhập
+     * Xử lý đăng nhập (có kiểm tra & khóa tài khoản)
      */
     public function login(Request $request): RedirectResponse
     {
         // ✅ validate form input
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
+
+        $user = User::where('email', $credentials['email'])->first();
+
+        // ⚠️ Nếu user tồn tại nhưng bị khóa
+        if ($user && $user->is_locked) {
+            return back()->withErrors([
+                'email' => 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.',
+            ])->onlyInput('email');
+        }
 
         // ✅ kiểm tra thông tin đăng nhập
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
+            // ✅ Reset số lần sai
             $user = Auth::user();
+            $user->update(['login_attempts' => 0]);
 
-            // ✅ phân quyền (nếu có cột role trong bảng users)
+            // ✅ phân quyền
             if ($user->role === 'admin') {
                 return redirect()->intended('/admin');
             }
 
             return redirect()->intended(route('home'));
-
         }
 
-        // ❌ sai email hoặc mật khẩu
+        // ❌ Nếu sai mật khẩu
+        if ($user) {
+            $user->increment('login_attempts');
+
+            // 🔒 Nếu sai quá 3 lần thì khóa tài khoản
+            if ($user->login_attempts >= 3) {
+                $user->update(['is_locked' => true]);
+                return back()->withErrors([
+                    'email' => 'Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 3 lần.',
+                ])->onlyInput('email');
+            }
+        }
+
         return back()->withErrors([
             'email' => 'Email hoặc mật khẩu không chính xác.',
         ])->onlyInput('email');

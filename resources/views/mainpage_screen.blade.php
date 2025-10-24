@@ -6,7 +6,7 @@
     <!-- Giới thiệu -->
     <div class="intro">
         <h1>🖥️MaiCo Technology</h1>
-        <p>Laptop, phụ kiện và thiết bị công nghệ chính hãng</p>
+        <p>Điện thoại, phụ kiện và thiết bị công nghệ chính hãng</p>
     </div>
 
     <!-- Banner -->

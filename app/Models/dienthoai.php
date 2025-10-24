@@ -11,7 +11,7 @@ class DienThoai extends Model
 
     // 🔹 Tên bảng trong database
     protected $table = 'dien_thoais';
-
+public $timestamps = false;
     // 🔹 Các cột có thể ghi
     protected $fillable = [
         'ten_sp',
@@ -28,6 +28,7 @@ class DienThoai extends Model
         'pin',
         'mau_sac',
         'duong_dan',
+        'brand_id',
     ];
 
     /**
@@ -45,9 +46,32 @@ class DienThoai extends Model
     {
         return $this->belongsTo(DanhMuc::class, 'danh_muc_id');
     }
+
+    /**
+     * 🔹 Quan hệ ngược với bảng Brand (mỗi sản phẩm thuộc 1 thương hiệu)
+     */
     public function brand()
+    {
+        return $this->belongsTo(Brand::class, 'brand_id');
+    }
+
+    /**
+     * ✅ Accessor: Tự động hiển thị giá đúng đơn vị VNĐ
+     * Nếu giá nhỏ hơn 1.000.000 => hiểu là đơn vị “triệu” => nhân 1.000.000
+     */
+ public function getGiaHienThiAttribute()
 {
-    return $this->belongsTo(Brand::class, 'brand_id');
+    // Bỏ dấu phẩy nếu có và ép về float
+    $gia = (float) str_replace(',', '', $this->gia);
+
+    // Nếu giá nhỏ hơn 10 triệu (có thể đang lưu đơn vị "triệu") thì nhân thêm 1 triệu
+    return $gia < 10000000 ? $gia * 1000000 : $gia;
 }
+
+public function getGiaFormattedAttribute()
+{
+    return number_format($this->gia_hien_thi, 0, ',', '.') . '₫';
+}
+
 
 }

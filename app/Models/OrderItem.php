@@ -14,4 +14,14 @@ class OrderItem extends Model
     {
         return $this->belongsTo(DienThoai::class);
     }
+
+    /**
+     * Lấy đơn hàng (order) mà item này thuộc về.
+     * Mối quan hệ này là bắt buộc để code trong ReviewController có thể chạy.
+     */
+    public function order()
+    {
+        // Giả sử Model của bạn tên là Order và nằm ở App\Models\Order
+        return $this->belongsTo(\App\Models\Order::class);
+    }
 }

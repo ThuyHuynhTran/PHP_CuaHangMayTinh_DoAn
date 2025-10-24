@@ -9,16 +9,29 @@ class DanhMuc extends Model
 {
     use HasFactory;
 
-    protected $table = 'danh_mucs'; // Tên bảng trong DB
-    protected $fillable = ['ten_danh_muc'];
-    public $timestamps = false; // nếu bảng không có cột created_at / updated_at
+    /**
+     * 🗂️ Tên bảng trong cơ sở dữ liệu mà model này quản lý.
+     */
+    protected $table = 'danh_mucs';
 
     /**
-     * 🔹 Mỗi danh mục có nhiều sản phẩm (điện thoại)
+     * ⚙️ Các cột được phép gán dữ liệu hàng loạt (Mass Assignment).
+     */
+    protected $fillable = ['ten_danh_muc'];
+
+    /**
+     * ⏱️ Tắt tính năng tự động quản lý timestamps (created_at, updated_at).
+     * Sử dụng nếu bảng của bạn không có 2 cột này.
+     */
+    public $timestamps = false;
+
+    /**
+     * 🔹 Quan hệ 1-nhiều: Một danh mục có thể có nhiều sản phẩm.
      */
     public function products()
     {
-        // Giả sử bảng 'dien_thoais' có cột khóa ngoại 'danh_muc_id'
+        // Giả sử model sản phẩm của bạn là 'DienThoai' và có khóa ngoại 'danh_muc_id'
         return $this->hasMany(DienThoai::class, 'danh_muc_id');
     }
 }
+

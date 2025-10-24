@@ -7,16 +7,15 @@ use App\Models\DienThoai;
 use App\Models\Address;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Promotion; // 🔹 Bổ sung
-use App\Models\Order;     // 🔹 Bổ sung
-use Carbon\Carbon;        // 🔹 Bổ sung
+use App\Models\Promotion;
+use App\Models\Order;
+use Carbon\Carbon;
 
 class CartController extends Controller
 {
     /** 🛒 Thêm sản phẩm vào giỏ hàng */
     public function addToCart(Request $request, $productId)
     {
-        // ... (Giữ nguyên code cũ của bạn)
         if (!Auth::check()) {
             if ($request->ajax()) {
                 return response()->json(['success' => false, 'message' => 'Vui lòng đăng nhập để thêm sản phẩm!']);
@@ -60,7 +59,6 @@ class CartController extends Controller
     /** 🧾 Hiển thị giỏ hàng */
     public function viewCart()
     {
-        // ... (Giữ nguyên code cũ của bạn)
         $cartItems = Cart::with('product')
             ->where('user_id', Auth::id())
             ->orderBy('updated_at', 'desc')
@@ -79,17 +77,27 @@ class CartController extends Controller
     public function checkoutSelected(Request $request)
     {
         $selectedProductIds = $request->input('selected_products', []);
+        $quantities = $request->input('quantities', []); // ✅ Nhận số lượng thực tế từ form
 
         if (empty($selectedProductIds)) {
             return redirect()->route('cart.view')->with('error', 'Vui lòng chọn sản phẩm.');
         }
 
-        $user = Auth::user(); // Lấy user đang đăng nhập
+        $user = Auth::user();
+
         $selectedItems = Cart::with('product')
             ->whereIn('id', $selectedProductIds)
             ->where('user_id', $user->id)
             ->get();
 
+        // ✅ Cập nhật số lượng tạm thời trong dữ liệu tính toán
+        foreach ($selectedItems as $item) {
+            if (isset($quantities[$item->id])) {
+                $item->quantity = (int) $quantities[$item->id];
+            }
+        }
+
+        // ✅ Tính tổng tiền dựa trên số lượng mới
         $total = $selectedItems->sum(function ($item) {
             $price = (float) preg_replace('/[^\d.]/', '', $item->product->gia);
             return $price * $item->quantity;
@@ -97,35 +105,29 @@ class CartController extends Controller
 
         $addresses = Address::where('user_id', $user->id)->get();
 
-        // --- 🔹 BẮT ĐẦU PHẦN CODE BỊ THIẾU 🔹 ---
-        // Lấy danh sách ID các khuyến mãi mà user này ĐÃ SỬ DỤNG
+        // ✅ Lấy danh sách khuyến mãi còn hiệu lực mà user chưa sử dụng
         $usedPromotionIds = Order::where('user_id', $user->id)
-                                 ->whereNotNull('promotion_id')
-                                 ->pluck('promotion_id')
-                                 ->unique();
+                                ->whereNotNull('promotion_id')
+                                ->pluck('promotion_id')
+                                ->unique();
 
-        // Lấy các khuyến mãi đang hiệu lực VÀ user CHƯA TỪNG SỬ DỤNG
         $now = Carbon::now();
         $activePromotions = Promotion::where('start_date', '<=', $now)
-                                     ->where('end_date', '>=', $now)
-                                     ->whereNotIn('id', $usedPromotionIds)
-                                     ->get();
-        // --- 🔹 KẾT THÚC PHẦN CODE BỊ THIẾU 🔹 ---
+                                    ->where('end_date', '>=', $now)
+                                    ->whereNotIn('id', $usedPromotionIds)
+                                    ->get();
 
-        // Trả về view và truyền thêm biến $activePromotions
         return view('checkout', [
             'cartItems' => $selectedItems,
             'total' => $total,
             'addresses' => $addresses,
-            'activePromotions' => $activePromotions, // 🔹 Đã bổ sung biến này
+            'activePromotions' => $activePromotions,
         ]);
     }
-
 
     /** ❌ Xóa sản phẩm khỏi giỏ hàng */
     public function removeFromCart(Request $request, $id)
     {
-        // ... (Giữ nguyên code cũ của bạn)
         $cartItem = Cart::where('id', $id)->where('user_id', Auth::id())->first();
 
         if (!$cartItem) {

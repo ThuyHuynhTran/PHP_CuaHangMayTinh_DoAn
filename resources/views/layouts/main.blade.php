@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mai Cồ Shop</title>
+    
+    {{-- ✅ THÊM DÒNG NÀY ĐỂ BẢO MẬT VÀ CHO AJAX HOẠT ĐỘNG --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
@@ -44,9 +47,16 @@
     {{-- 🚀 Nút Liên hệ & Lên đầu --}}
     {{-- ========================================================= --}}
     <div id="floating-buttons">
+        <!-- Nút ba dấu chấm -->
+        <button id="btn-more-info" class="floating-btn" style="background-color: #e21b1b;">
+            <i class="fas fa-ellipsis-h"></i>
+        </button>
+        <!-- Nút liên hệ -->
         <button id="btn-contact" class="floating-btn" style="background-color: #e21b1b;">
             <i class="fas fa-headset"></i> Liên hệ
+            <span id="message-badge" class="badge" style="display:none;">1</span> <!-- Badge -->
         </button>
+        <!-- Nút lên đầu -->
         <button id="btn-top" class="floating-btn" style="background-color: #333;">
             <i class="fas fa-arrow-up"></i>
         </button>
@@ -121,24 +131,14 @@
     {{-- 💬 Khung chat --}}
     <div id="chat-window">
         <div class="popup-header">
-    <i class="fas fa-robot"></i> Nhân viên hỗ trợ
-    <div style="display:flex; align-items:center; gap:8px;">
-        <button id="menu-toggle" style="background:none;border:none;color:white;font-size:18px;cursor:pointer;">
-            <i class="fas fa-bars"></i>
-        </button>
-        <button id="close-chat" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;">&times;</button>
-    </div>
-</div>
-
-<!-- 🔽 Dropdown menu ẩn mặc định -->
-<div id="chat-menu" style="display:none; position:absolute; right:35px; top:55px;
-    background:white; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.2);
-    padding:8px; z-index:99999; width:180px;">
-    <button id="end-chat" style="width:100%; border:none; background:#e21b1b; color:white;
-        padding:8px; border-radius:6px; font-weight:600; cursor:pointer;">
-        <i class="fas fa-power-off"></i> Kết thúc trò chuyện
-    </button>
-</div>
+            <i class="fas fa-robot"></i> Nhân viên hỗ trợ
+            <div style="display:flex; align-items:center; gap:8px;">
+                <button id="menu-toggle" style="background:none;border:none;color:white;font-size:18px;cursor:pointer;">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <button id="close-chat" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;">&times;</button>
+            </div>
+        </div>
 
         <div id="chat-messages" class="chat-body">
             <div class="chat-message left">
@@ -195,6 +195,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const btnTop = document.getElementById("btn-top");
     const btnContact = document.getElementById("btn-contact");
+    const btnMoreInfo = document.getElementById("btn-more-info");
     const contactPopup = document.getElementById("contact-popup");
     const closePopup = document.getElementById("close-popup");
     const btnStartChat = document.getElementById("btn-start-chat");
@@ -211,6 +212,11 @@ document.addEventListener("DOMContentLoaded", function () {
     btnContact.addEventListener("click", () => {
         contactPopup.style.display = "block";
         chatWindow.style.display = "none";
+    });
+
+    // ☰ Mở menu thêm thông tin
+    btnMoreInfo.addEventListener("click", () => {
+        alert("Đây là phần thêm thông tin...");
     });
 
     // ❌ Đóng popup
@@ -260,23 +266,38 @@ document.addEventListener("DOMContentLoaded", function () {
         sendToServer({ name, email, phone, message: msg }, false);
     });
 
+    // Gửi bằng phím Enter
+    input.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+            sendBtn.click();
+        }
+    });
+
     // 💾 GỬI LÊN SERVER
     function sendToServer(data, isFirstMessage = false) {
         fetch("{{ route('chat.send') }}", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             body: JSON.stringify(data)
         })
-        .then(res => res.ok ? res.json() : null)
-        .then(res => {
-            if (res && res.success && isFirstMessage) {
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => { throw new Error(text || 'Lỗi server không xác định') });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data && data.success && isFirstMessage) {
                 setTimeout(() => appendMessage("Admin", "Cảm ơn bạn! Chúng tôi sẽ phản hồi sớm ❤️", "left"), 800);
             }
         })
-        .catch(() => {});
+        .catch((error) => {
+            console.error('Lỗi nghiêm trọng khi gửi tin nhắn:', error);
+            alert('Không thể gửi tin nhắn. Vui lòng kiểm tra console để biết chi tiết.');
+        });
     }
 
     // 🧩 Thêm tin nhắn vào giao diện
@@ -288,61 +309,20 @@ document.addEventListener("DOMContentLoaded", function () {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // 💡 FAQ trong popup
-    const faqLinks = document.querySelectorAll(".faq-link");
-    const faqContent = document.getElementById("faq-content");
-    const closeFaq = document.getElementById("close-faq");
-
-    faqLinks.forEach(link => {
-        link.addEventListener("click", e => {
-            e.preventDefault();
-            document.querySelectorAll(".faq-item").forEach(i => i.style.display = "none");
-            const target = document.getElementById(link.dataset.target);
-            if (target) {
-                faqContent.style.display = "block";
-                target.style.display = "block";
-            }
+    // Tự động ẩn thông báo flash
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.auto-hide-alert');
+        alerts.forEach(alert => {
+            alert.style.transition = 'opacity 0.5s ease';
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 500);
         });
-    });
-
-    closeFaq.addEventListener("click", () => {
-        faqContent.style.display = "none";
-        document.querySelectorAll(".faq-item").forEach(i => i.style.display = "none");
-    });
-
-    // ⚙️ Menu 3 gạch
-    const menuToggle = document.getElementById("menu-toggle");
-    const chatMenu = document.getElementById("chat-menu");
-    const endChat = document.getElementById("end-chat");
-
-    menuToggle.addEventListener("click", (e) => {
-        e.stopPropagation();
-        chatMenu.style.display = chatMenu.style.display === "block" ? "none" : "block";
-    });
-
-    document.addEventListener("click", (e) => {
-        if (!chatMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-            chatMenu.style.display = "none";
-        }
-    });
-
-    // 🧹 Kết thúc trò chuyện
-    endChat.addEventListener("click", () => {
-        if (confirm("Bạn có chắc muốn kết thúc cuộc trò chuyện không?")) {
-            sessionStorage.clear();
-            chatMessages.innerHTML = `
-                <div class="chat-message left">
-                    <strong>Hệ thống:</strong> Cuộc trò chuyện đã kết thúc. Cảm ơn bạn đã liên hệ ❤️
-                </div>
-            `;
-            setTimeout(() => {
-                chatWindow.style.display = "none";
-                chatMenu.style.display = "none";
-            }, 1500);
-        }
-    });
+    }, 4000);
 });
 </script>
+
+{{-- ✅ THÊM DÒNG NÀY ĐỂ CÁC TRANG CON CÓ THỂ THÊM SCRIPT --}}
+@stack('scripts')
 
 </body>
 </html>

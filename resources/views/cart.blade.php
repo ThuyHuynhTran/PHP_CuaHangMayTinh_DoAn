@@ -7,8 +7,6 @@
             <i class="fas fa-shopping-cart"></i> Giỏ hàng của bạn
         </h2>
 
-        
-
         @if(empty($cartItems) || count($cartItems) === 0)
             <div style="text-align: center; color: #777; padding: 60px 0;">
                 <i class="fas fa-box-open" style="font-size: 60px; color: #9de2ff;"></i>
@@ -30,7 +28,6 @@
                 border-radius: 8px;
                 margin-bottom: 10px;
                 color: black;
-                
             ">
                 <div></div>
                 <div style="text-align: left; padding-left: 20px;">Sản phẩm</div>
@@ -41,14 +38,15 @@
             </div>
 
             @foreach($cartItems as $cartItem)
-            <div class="cart-item-row" style="
-                display: grid;
-                grid-template-columns: 0.5fr 3fr 1fr 1fr 1fr 0.5fr;
-                align-items: center;
-                padding: 15px 0;
-                border-bottom: 1px solid #eee;
-                text-align: center;
-            ">
+            <div class="cart-item-row"
+                 data-price="{{ (float) preg_replace('/[^\d.]/', '', $cartItem->product->gia) }}"
+                 style="display: grid;
+                        grid-template-columns: 0.5fr 3fr 1fr 1fr 1fr 0.5fr;
+                        align-items: center;
+                        padding: 15px 0;
+                        border-bottom: 1px solid #eee;
+                        text-align: center;">
+                
                 <div>
                     <input type="checkbox" 
                            value="{{ $cartItem->id }}" 
@@ -118,71 +116,75 @@
 </main>
 
 <script>
-// Nút tăng/giảm số lượng (giữ nguyên)
-function updateQuantity(button, change) {
-    const input = button.parentElement.querySelector('input');
-    let currentValue = parseInt(input.value);
-    let newValue = currentValue + change;
-    if (newValue < 1) newValue = 1;
-    input.value = newValue;
-}
-
-// Cập nhật tổng tiền khi chọn checkbox
 document.addEventListener("DOMContentLoaded", function () {
     const checkboxes = document.querySelectorAll('.cart-checkbox');
     const totalDisplay = document.getElementById('selectedTotal');
     const checkoutForm = document.getElementById('checkoutForm');
     const checkoutButton = document.getElementById('checkoutButton');
 
-    // ✅ THAY ĐỔI 2: Thêm script tự động ẩn thông báo sau 5 giây
-    const alertBox = document.querySelector('.auto-hide-alert');
-    if (alertBox) {
-        setTimeout(() => {
-            // Thêm hiệu ứng mờ dần (fade out) cho đẹp
-            alertBox.style.transition = 'opacity 0.5s ease';
-            alertBox.style.opacity = '0';
-            
-            // Sau khi hiệu ứng kết thúc, ẩn hoàn toàn thẻ div để không chiếm không gian
-            setTimeout(() => {
-                alertBox.style.display = 'none';
-            }, 200); // Thời gian này khớp với thời gian của transition
-            
-        }, 2000); // 5000ms = 5 giây
+    // Hàm cập nhật tổng giá từng dòng
+    function updateRowTotal(row) {
+        const price = parseFloat(row.dataset.price);
+        const quantity = parseInt(row.querySelector('input[type="text"]').value);
+        const itemTotal = row.querySelector('.item-total');
+        itemTotal.textContent = new Intl.NumberFormat('vi-VN').format(price * quantity) + '₫';
     }
-    // Kết thúc phần code mới
 
-    checkboxes.forEach(chk => chk.addEventListener('change', updateTotal));
-
+    // Hàm cập nhật tổng tiền khi tick checkbox
     function updateTotal() {
         let total = 0;
         checkboxes.forEach(chk => {
             if (chk.checked) {
-                const row = chk.closest('.cart-item-row'); 
-                const priceText = row.querySelector('.item-total').innerText.replace(/[^\d]/g, '');
-                total += parseFloat(priceText);
+                const row = chk.closest('.cart-item-row');
+                const rowTotal = parseFloat(row.querySelector('.item-total').innerText.replace(/[^\d]/g, ''));
+                total += rowTotal;
             }
         });
         totalDisplay.textContent = new Intl.NumberFormat('vi-VN').format(total) + '₫';
     }
 
+    // Gắn vào window để gọi từ HTML
+    window.updateQuantity = function (button, change) {
+        const row = button.closest('.cart-item-row');
+        const input = row.querySelector('input[type="text"]');
+        let currentValue = parseInt(input.value);
+        let newValue = currentValue + change;
+        if (newValue < 1) newValue = 1;
+        input.value = newValue;
+        updateRowTotal(row);
+        updateTotal();
+    };
+
+    checkboxes.forEach(chk => chk.addEventListener('change', updateTotal));
+
+    // Xử lý thanh toán
     checkoutButton.addEventListener('click', function (e) {
         const selectedCheckboxes = document.querySelectorAll('.cart-checkbox:checked');
 
         if (selectedCheckboxes.length === 0) {
             e.preventDefault();
-            alert('⚠️ Vui lòng chọn sản phẩm trước khi thanh toán!');
-            return; 
+            alert('Vui lòng chọn sản phẩm trước khi thanh toán!');
+            return;
         }
 
         const csrfInput = checkoutForm.querySelector('input[name="_token"]').outerHTML;
         checkoutForm.innerHTML = csrfInput;
-        
+
         selectedCheckboxes.forEach(chk => {
-            const hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = 'selected_products[]';
-            hiddenInput.value = chk.value;
-            checkoutForm.appendChild(hiddenInput);
+            const row = chk.closest('.cart-item-row');
+            const quantity = parseInt(row.querySelector('input[type="text"]').value);
+
+            const idInput = document.createElement('input');
+            idInput.type = 'hidden';
+            idInput.name = 'selected_products[]';
+            idInput.value = chk.value;
+            checkoutForm.appendChild(idInput);
+
+            const qtyInput = document.createElement('input');
+            qtyInput.type = 'hidden';
+            qtyInput.name = `quantities[${chk.value}]`;
+            qtyInput.value = quantity;
+            checkoutForm.appendChild(qtyInput);
         });
 
         checkoutForm.submit();

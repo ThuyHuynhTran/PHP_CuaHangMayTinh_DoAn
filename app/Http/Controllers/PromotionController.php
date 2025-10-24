@@ -1,109 +1,146 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\PromotionSubscriber;
 use App\Models\Promotion;
 use App\Models\Notification;
-use App\Events\PromotionAdded; // Sử dụng Event để gửi thông báo
+use Illuminate\Support\Facades\Log;
 
 class PromotionController extends Controller
 {
-    // Đăng ký người dùng nhận thông báo khuyến mãi
+    /**
+     * 🔔 Đăng ký người dùng nhận thông báo khuyến mãi
+     */
     public function subscribe(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|unique:promotions_subscribers,email',
+            'email' => 'required|email|unique:promotion_subscribers,email',
             'phone' => 'nullable|string|max:20',
         ]);
 
-        // Lưu thông tin người dùng vào bảng promotions_subscribers
-        PromotionSubscriber::create([
+        $subscriber = PromotionSubscriber::create([
             'email' => $request->email,
             'phone' => $request->phone,
+            'is_verified' => 1,   // ✅ Cho phép nhận thông báo
+            'is_notified' => 0,   // ✅ Chưa nhận khuyến mãi nào
         ]);
 
-        return response()->json(['success' => true, 'message' => 'Đăng ký thành công!']);
-    }
+        Log::info('✅ New subscriber added: ' . $subscriber->email);
 
-    // Lấy danh sách thông báo của người dùng đã đăng nhập
-    public function notifications()
-    {
-        // Kiểm tra người dùng đã đăng nhập chưa
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
-
-        // Lấy thông báo của người dùng hiện tại
-        $notifications = Notification::where('user_id', auth()->id())
-                                     ->orderBy('created_at', 'desc')
-                                     ->take(10)
-                                     ->get();
-        
-        return view('notifications.index', compact('notifications'));
-    }
-
-    // Lưu thông báo và gửi cho tất cả người dùng đăng ký
-    public function store(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
+        return response()->json([
+            'success' => true,
+            'message' => 'Đăng ký nhận thông báo khuyến mãi thành công!',
+            'data' => $subscriber,
         ]);
-
-        // Tạo mới promotion
-        $promotion = Promotion::create([
-            'title' => $request->title,
-            'content' => $request->content,
-        ]);
-
-        // Gửi thông báo cho tất cả người dùng đã đăng ký qua sự kiện
-        $subscribers = PromotionSubscriber::all();
-
-        foreach ($subscribers as $subscriber) {
-            // Tạo thông báo cho người dùng
-            Notification::create([
-                'user_id' => $subscriber->id,
-                'title' => $promotion->title,
-                'content' => $promotion->content,
-            ]);
-        }
-
-        // Gửi thông báo qua sự kiện (Nếu bạn sử dụng WebSockets hoặc Push Notifications)
-        event(new PromotionAdded($promotion));
-
-        return response()->json(['success' => true, 'message' => 'Khuyến mãi đã được tạo và thông báo đã được gửi!']);
     }
 
-    // Lấy danh sách thông báo của người dùng hiện tại (API)
+    /**
+     * 📬 Lấy danh sách thông báo của người dùng hiện tại (API)
+     */
     public function getNotifications()
     {
-        // Kiểm tra người dùng đã đăng nhập chưa
         if (!auth()->check()) {
             return response()->json(['error' => 'Chưa đăng nhập'], 401);
         }
 
-        // Lấy thông báo của người dùng hiện tại
         $notifications = Notification::where('user_id', auth()->id())
-                                     ->latest()
-                                     ->take(5)
-                                     ->get();
-        
-        return response()->json(['notifications' => $notifications]);
+            ->latest()
+            ->paginate(10);
+
+        return response()->json([
+            'success' => true,
+            'notifications' => $notifications
+        ]);
     }
 
-    // Đánh dấu thông báo là đã đọc
+    /**
+     * 🕓 Đánh dấu thông báo là đã đọc
+     */
     public function markAsRead($id)
     {
         $notification = Notification::find($id);
 
-        // Kiểm tra quyền truy cập của người dùng
-        if ($notification && $notification->user_id == auth()->id()) {
-            $notification->update(['is_read' => true]);
-
-            return redirect()->back()->with('success', 'Đã đánh dấu thông báo là đã đọc!');
+        if (!$notification) {
+            return response()->json(['error' => 'Thông báo không tồn tại'], 404);
         }
 
-        return redirect()->back()->with('error', 'Thông báo không hợp lệ hoặc bạn không có quyền');
+        if ($notification->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Bạn không có quyền thao tác'], 403);
+        }
+
+        $notification->update([
+            'is_read' => true,
+            'read_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã đánh dấu thông báo là đã đọc!',
+        ]);
+    }
+
+    /**
+     * 🎉 Admin thêm khuyến mãi mới (Observer sẽ tự gửi thông báo)
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'discount_percent' => 'nullable|numeric|min:0|max:100',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after:start_date',
+        ]);
+
+        $promotion = Promotion::create($validated);
+
+        Log::info('✅ New promotion created: ' . $promotion->title);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Khuyến mãi đã được tạo thành công! Thông báo sẽ tự động gửi đến subscribers.',
+            'data' => $promotion,
+        ]);
+    }
+/**
+ * 🖥 Hiển thị giao diện danh sách thông báo của user
+ */
+public function showNotifications()
+{
+    if (!auth()->check()) {
+        return redirect()->route('login')->with('error', 'Bạn cần đăng nhập để xem thông báo.');
+    }
+
+    $notifications = Notification::with('promotion')
+        ->where('user_id', auth()->id())
+        ->orderByDesc('created_at')
+        ->paginate(10);
+
+    return view('notifications.index', compact('notifications'));
+}
+
+    /**
+     * 🧪 API test nhanh cho Observer (dùng khi debug)
+     * POST /api/test-promotion
+     */
+    public function testPromotion()
+    {
+        $promotion = Promotion::create([
+            'title' => 'Test Promo ' . now()->format('H:i:s'),
+            'description' => 'Khuyến mãi thử nghiệm - kiểm tra observer.',
+            'discount_percent' => rand(5, 50),
+            'start_date' => now(),
+            'end_date' => now()->addDays(5),
+        ]);
+
+        Log::info('🧪 Test promotion created manually.');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã tạo khuyến mãi test — kiểm tra log hoặc bảng notifications.',
+            'data' => $promotion,
+        ]);
     }
 }

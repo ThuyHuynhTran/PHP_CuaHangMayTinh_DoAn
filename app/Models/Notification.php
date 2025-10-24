@@ -9,15 +9,20 @@ class Notification extends Model
 {
     use HasFactory;
 
-    // Tên bảng của bạn
-    protected $table = 'notifications';
-
-    // Các cột được phép gán hàng loạt
+    /**
+     * Các cột được phép gán dữ liệu hàng loạt.
+     * Cần bao gồm tất cả các cột mà bạn đang cố gắng chèn.
+     */
     protected $fillable = [
         'user_id',
-        'title',
-        'content',
+        'promotion_id',
+        'message_id',
+        'message',
         'is_read',
+        'type',
+        'notifiable_type',
+        'notifiable_id',
+        'data',
     ];
 
     /**
@@ -27,4 +32,21 @@ class Notification extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Lấy thông tin khuyến mãi mà thông báo này thuộc về (nếu có).
+     */
+    public function promotion()
+    {
+        return $this->belongsTo(Promotion::class);
+    }
+
+    /**
+     * Lấy thông tin cuộc hội thoại mà thông báo này thuộc về (nếu có).
+     */
+    public function messageRel()
+    {
+        return $this->belongsTo(Message::class, 'message_id');
+    }
 }
+

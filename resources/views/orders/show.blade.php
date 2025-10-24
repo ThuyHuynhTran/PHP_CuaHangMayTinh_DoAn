@@ -42,6 +42,23 @@
             </div>
         </div>
 
+        <!-- Khuyến mãi áp dụng -->
+        <div style="margin-top:20px; border-top:1px solid #eee; padding-top:10px;">
+            <h4 style="color:#333; font-size:17px;">Khuyến mãi áp dụng</h4>
+            @if($order->promotion)
+                <p style="margin:0;">
+                    🎁 <strong>{{ $order->promotion->title }}</strong>  
+                    (Giảm {{ rtrim(rtrim(number_format($order->promotion->discount_percent, 2), '0'), '.') }}%)
+                </p>
+                <p style="color:green; margin-top:3px;">
+                    Tiết kiệm: 
+                    <strong>{{ number_format(($order->total_before_discount - $order->total), 0, ',', '.') }}₫</strong>
+                </p>
+            @else
+                <p style="margin:0; color:#777;">Không áp dụng khuyến mãi</p>
+            @endif
+        </div>
+
         <!-- Thông tin thanh toán -->
         <div style="margin-top:20px; border-top:1px solid #eee; padding-top:10px;">
             <h4 style="color:#333; font-size:17px;">Phương thức thanh toán</h4>

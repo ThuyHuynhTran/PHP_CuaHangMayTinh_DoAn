@@ -19,9 +19,8 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-        // Bây giờ Laravel đã biết Promotion là model nào
-        Promotion::observe(PromotionObserver::class);
-    }
+   public function boot(): void
+{
+    Promotion::observe(PromotionObserver::class);
+}
 }

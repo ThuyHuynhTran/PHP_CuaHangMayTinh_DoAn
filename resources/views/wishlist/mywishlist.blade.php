@@ -149,3 +149,72 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Lắng nghe sự kiện click trên tất cả các nút có class .wishlist-btn
+    document.querySelectorAll('.wishlist-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const productId = this.dataset.id;
+            const cardElement = this.closest('.wishlist-card'); // Tìm đến card cha
+
+            // Lấy token CSRF từ thẻ meta
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            // Gửi yêu cầu AJAX đến controller
+            fetch("{{ route('wishlist.toggle') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    product_id: productId
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // === BẮT ĐẦU PHẦN CẬP NHẬT ===
+                // Hiển thị thông báo nhỏ (thay vì alert)
+                const toast = document.createElement('div');
+                toast.innerText = data.message;
+                toast.style.position = 'fixed';
+                toast.style.top = '20px';
+                toast.style.left = '50%';
+                toast.style.transform = 'translateX(-50%)';
+                toast.style.background = data.status === 'added' ? '#d4edda' : '#f8d7da';
+                toast.style.color = data.status === 'added' ? '#155724' : '#721c24';
+                toast.style.padding = '15px 25px';
+                toast.style.borderRadius = '8px';
+                toast.style.zIndex = '10000';
+                toast.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+                // === KẾT THÚC PHẦN CẬP NHẬT ===
+
+                // Nếu sản phẩm đã bị xóa, hãy làm mờ và ẩn nó khỏi trang
+                if (data.status === 'removed') {
+                    if(cardElement) {
+                        cardElement.style.transition = 'opacity 0.5s ease';
+                        cardElement.style.opacity = '0';
+                        setTimeout(() => cardElement.remove(), 500);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi khi gửi yêu cầu:', error);
+                alert('Có lỗi xảy ra, vui lòng thử lại.');
+            });
+        });
+    });
+});
+</script>
+@endpush
+

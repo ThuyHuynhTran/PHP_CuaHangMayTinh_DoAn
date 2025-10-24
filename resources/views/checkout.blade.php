@@ -11,10 +11,14 @@
 
         <!-- ĐỊA CHỈ NHẬN HÀNG -->
         <div id="addressSection" style="padding: 25px 25px 25px 40px; border-bottom: 1px solid #eee;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h4 style="color: #c21b1b; font-weight: bold; margin: 0;">Địa chỉ nhận hàng</h4>
-                <a href="#" id="changeAddressBtn" style="color: #c21b1b; font-weight: 600; text-decoration: none;">Thay đổi</a>
-            </div>
+           <div style="text-align: center; position: relative;">
+    <h4 style="color: #c21b1b; font-weight: bold; margin: 0; display: inline-block;">Địa chỉ nhận hàng</h4>
+    <a href="#" id="changeAddressBtn"
+       style="color: #c21b1b; font-weight: 600; text-decoration: none; position: absolute; right: 25px; top: 0;">
+        Thay đổi
+    </a>
+</div>
+
 
             @php
                 $addresses = $addresses ?? collect();
@@ -46,7 +50,11 @@
 
                 <div id="addressList">
                     @foreach($addresses as $address)
-                        <label class="address-item" data-id="{{ $address->id }}"
+                        <label class="address-item"
+                               data-id="{{ $address->id }}"
+                               data-fullname="{{ $address->fullname }}"
+                               data-phone="{{ $address->phone }}"
+                               data-address="{{ $address->address }}"
                                style="display:block; border:1px solid #ddd; border-radius:10px; padding:12px 15px;
                                       margin-bottom:10px; cursor:pointer; transition:0.2s;
                                       {{ $address->is_default ? 'border-color:#c21b1b; background:#fff6f6;' : '' }}">
@@ -90,18 +98,16 @@
             </div>
         </div>
 
+        {{-- CÁC PHẦN SẢN PHẨM, KHUYẾN MÃI, THANH TOÁN... GIỮ NGUYÊN --}}
         <!-- SẢN PHẨM -->
         <div style="padding: 25px 25px 25px 40px; border-bottom: 1px solid #eee;">
             <h4 style="color: #c21b1b; font-weight: bold; margin-bottom: 20px;">Sản phẩm</h4>
-
             @if(isset($cartItems) && count($cartItems) > 0)
                 @foreach($cartItems as $item)
                     <div style="border: 1px solid #ddd; border-radius: 10px; padding: 15px 20px; margin-bottom: 15px; background-color: #fff;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div style="display: flex; align-items: center; gap: 15px;">
-                                <img src="{{ asset('assets/img/' . $item->product->duong_dan) }}" 
-                                     alt="{{ $item->product->ten_sp }}" 
-                                     style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover;">
+                                <img src="{{ asset('assets/img/' . $item->product->duong_dan) }}" alt="{{ $item->product->ten_sp }}" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover;">
                                 <div>
                                     <p style="font-weight: 600; font-size: 16px; margin: 0;">{{ $item->product->ten_sp }}</p>
                                     <p style="color: #666; font-size: 14px;">Số lượng: x{{ $item->quantity }}</p>
@@ -115,11 +121,9 @@
                 @endforeach
             @elseif(isset($product))
                 <div style="border: 1px solid #ddd; border-radius: 10px; padding: 15px 20px; background-color: #fff;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="display: flex; align-items: center; gap: 15px;">
-                            <img src="{{ asset('assets/img/' . $product->duong_dan) }}" 
-                                 alt="{{ $product->ten_sp }}" 
-                                 style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover;">
+                            <img src="{{ asset('assets/img/' . $product->duong_dan) }}" alt="{{ $product->ten_sp }}" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover;">
                             <div>
                                 <p style="font-weight: 600; font-size: 16px; margin: 0;">{{ $product->ten_sp }}</p>
                                 <p style="color: #666; font-size: 14px;">Số lượng: x1</p>
@@ -133,7 +137,7 @@
             @endif
         </div>
 
-        <!-- KHUYẾN MÃI (PHẦN MỚI) -->
+        <!-- KHUYẾN MÃI -->
         <div style="padding: 25px 25px 25px 40px; border-bottom: 1px solid #eee;">
             <h4 style="color: #c21b1b; font-weight: bold; margin-bottom: 15px;">Khuyến mãi</h4>
             @if(isset($activePromotions) && $activePromotions->isNotEmpty())
@@ -155,7 +159,7 @@
             <h4 style="color: #c21b1b; font-weight: bold; margin-bottom: 15px;">Phương thức thanh toán</h4>
             <div style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start;">
                 <label><input type="radio" name="payment_option" value="cod" checked> Thanh toán khi nhận hàng (COD)</label>
-                <label><input type="radio" name="payment_option" value="bank"> Chuyển khoản ngân hàng (VCB, MBB, TPBank)</label>
+                <label><input type="radio" name="payment_option" value="bank"> Chuyển khoản ngân hàng</label>
                 <label><input type="radio" name="payment_option" value="momo"> Ví MoMo / ZaloPay</label>
             </div>
         </div>
@@ -196,36 +200,23 @@
                 <input type="hidden" name="product_id" value="{{ $product->id }}">
             @endif
             <input type="hidden" name="payment_method" id="paymentMethod" value="cod">
-            <input type="hidden" name="promotion_id" id="promotionIdInput" value=""> <!-- Input ẩn để gửi ID khuyến mãi -->
-
+            <input type="hidden" name="promotion_id" id="promotionIdInput" value="">
             <div style="padding: 25px; text-align: right;">
-                <button type="submit"
-                        style="background-color: #c21b1b; color: white; border: none; padding: 14px 35px; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer;">
+                <button type="submit" style="background-color: #c21b1b; color: white; border: none; padding: 14px 35px; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer;">
                     Đặt hàng
                 </button>
             </div>
         </form>
 
         <!-- POPUP THÀNH CÔNG -->
-        <div id="orderSuccessPopup"
-             style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-                    background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:2000;">
-            <div style="background:white; border-radius:15px; padding:40px; width:380px; text-align:center;
-                        box-shadow:0 4px 10px rgba(0,0,0,0.2); animation: pop 0.3s ease;">
-                <div style="font-size:60px; color:#22bb33;">
-                    <i class="fas fa-check-circle"></i>
-                </div>
+        <div id="orderSuccessPopup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:2000;">
+            <div style="background:white; border-radius:15px; padding:40px; width:380px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.2); animation: pop 0.3s ease;">
+                <div style="font-size:60px; color:#22bb33;"><i class="fas fa-check-circle"></i></div>
                 <h2 style="margin:10px 0; color:#22bb33;">Đặt hàng thành công!</h2>
                 <p style="color:#555;">Đơn hàng của bạn đã được ghi nhận.</p>
-
                 <div style="display:flex; justify-content:center; gap:15px; margin-top:25px;">
-                    <a href="{{ route('home') }}"
-                       style="background:#c21b1b; color:white; padding:10px 18px; border-radius:8px;
-                              text-decoration:none; font-weight:bold;">Quay lại trang chủ</a>
-
-                    <a href="{{ route('orders.history') }}"
-                       style="background:#0099cc; color:white; padding:10px 18px; border-radius:8px;
-                              text-decoration:none; font-weight:bold;">Xem chi tiết đơn hàng</a>
+                    <a href="{{ route('home') }}" style="background:#c21b1b; color:white; padding:10px 18px; border-radius:8px; text-decoration:none; font-weight:bold;">Quay lại trang chủ</a>
+                    <a href="{{ route('orders.history') }}" style="background:#0099cc; color:white; padding:10px 18px; border-radius:8px; text-decoration:none; font-weight:bold;">Xem chi tiết đơn hàng</a>
                 </div>
             </div>
         </div>
@@ -239,121 +230,217 @@
     </div>
 </main>
 
-{{-- SCRIPT --}}
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    // === SCRIPT XỬ LÝ ĐỊA CHỈ (GIỮ NGUYÊN) ===
-    const modal = document.getElementById("addressModal");
-    const openBtn = document.getElementById("changeAddressBtn");
-    const closeBtn = document.getElementById("closeModalBtn");
-    const addNewBtn = document.getElementById("addNewAddressBtn");
-    const form = document.getElementById("addressForm");
-    const addressList = document.getElementById("addressList");
+    // --- KHAI BÁO BIẾN ---
+    const addressModal = document.getElementById("addressModal");
     const addressSection = document.getElementById("addressSection");
+    const addressList = document.getElementById("addressList");
+    const addressForm = document.getElementById("addressForm");
+    const checkoutForm = document.getElementById('checkoutForm');
+    const successPopup = document.getElementById('orderSuccessPopup');
+    const qrSection = document.getElementById("qrSection");
+    const paymentMethodInput = document.getElementById("paymentMethod");
+    const paymentRadios = document.querySelectorAll('input[name="payment_option"]');
+    const promotionSelect = document.getElementById('promotionSelect');
+    const promotionIdInput = document.getElementById('promotionIdInput');
 
+    // --- HÀM HỖ TRỢ ---
     function renderSelectedAddress(fullname, phone, address) {
+        if (!addressSection) return;
         addressSection.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h4 style="color: #c21b1b; font-weight: bold; margin: 0;">Địa chỉ nhận hàng</h4>
                 <a href="#" id="changeAddressBtn" style="color: #c21b1b; font-weight: 600; text-decoration: none;">Thay đổi</a>
             </div>
             <div style="margin-top: 10px; text-align: center;">
-                <p style="font-weight: bold; margin: 0;">
-                    ${fullname} <span style="color: #666;">| ${phone}</span>
-                </p>
+                <p style="font-weight: bold; margin: 0;">${fullname} <span style="color: #666;">| ${phone}</span></p>
                 <p style="color: #444; margin-top: 5px;">${address}</p>
-            </div>
-        `;
-        const _openBtn = addressSection.querySelector("#changeAddressBtn");
-        if(_openBtn) {_openBtn.addEventListener("click", e => { e.preventDefault(); modal.style.display = "flex"; });}
+            </div>`;
+        const newChangeBtn = document.getElementById("changeAddressBtn");
+        if (newChangeBtn) {
+            newChangeBtn.addEventListener("click", e => {
+                e.preventDefault();
+                if (addressModal) addressModal.style.display = "flex";
+            });
+        }
     }
 
-    if(openBtn) {openBtn.addEventListener("click", e => { e.preventDefault(); modal.style.display = "flex"; });}
-    if(closeBtn) {closeBtn.addEventListener("click", () => modal.style.display = "none");}
-    if(addNewBtn) {addNewBtn.addEventListener("click", () => {form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";});}
-    
-    // ... các script xử lý địa chỉ khác của bạn giữ nguyên ...
+    // --- LOGIC XỬ LÝ ĐỊA CHỈ ---
+    if (addressModal) {
+        const openBtn = document.getElementById("changeAddressBtn");
+        const closeBtn = document.getElementById("closeModalBtn");
+        const addNewBtn = document.getElementById("addNewAddressBtn");
 
-    // === SCRIPT THANH TOÁN QR (GIỮ NGUYÊN) ===
-    const qrSection = document.getElementById("qrSection");
-    const qrImage = document.getElementById("qrImage");
-    const qrNote = document.getElementById("qrNote");
-    const paymentRadios = document.querySelectorAll('input[name="payment_option"]');
-    const paymentMethodInput = document.getElementById("paymentMethod");
+        if(openBtn) { openBtn.addEventListener("click", e => { e.preventDefault(); addressModal.style.display = "flex"; }); }
+        if(closeBtn) { closeBtn.addEventListener("click", () => { addressModal.style.display = "none"; }); }
+        if(addNewBtn) { addNewBtn.addEventListener("click", () => { if(addressForm) addressForm.style.display = 'block'; }); }
+        
+        if (addressForm) {
+            addressForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const csrfToken = this.querySelector('input[name="_token"]').value;
+                try {
+                    const response = await fetch(this.action, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken },
+                        body: formData
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success && data.address) {
+                        const addr = data.address;
+                        renderSelectedAddress(addr.fullname, addr.phone, addr.address);
+                        
+                        // 🔹 BẮT ĐẦU SỬA LỖI 🔹
+                        // Logic để cập nhật danh sách địa chỉ trong popup mà không cần tải lại trang
+                        const newAddressElement = document.createElement('label');
+                        newAddressElement.className = 'address-item';
+                        // Gán data attributes cho item mới
+                        newAddressElement.dataset.id = addr.id;
+                        newAddressElement.dataset.fullname = addr.fullname;
+                        newAddressElement.dataset.phone = addr.phone;
+                        newAddressElement.dataset.address = addr.address;
+                        // Tạo nội dung HTML cho item mới
+                        newAddressElement.innerHTML = `
+                            <input type="radio" name="selected_address" value="${addr.id}" style="margin-right:8px;">
+                            <strong>${addr.fullname}</strong> | ${addr.phone}
+                            <p style="margin:5px 0; color:#444;">${addr.address}</p>
+                        `;
 
-    paymentRadios.forEach(radio => {
-        radio.addEventListener("change", () => {
-            const method = radio.value;
-            paymentMethodInput.value = method;
-            if (method === "bank") {
-                qrSection.style.display = "block";
-                qrImage.src = "{{ asset('assets/img/qr_bank.webp') }}";
-                qrNote.textContent = "Quét mã QR để chuyển khoản ngân hàng.";
-            } else if (method === "momo") {
-                qrSection.style.display = "block";
-                qrImage.src = "{{ asset('assets/img/qr_momo.webp') }}";
-                qrNote.textContent = "Quét mã QR để thanh toán qua Ví MoMo / ZaloPay.";
-            } else {
-                qrSection.style.display = "none";
-            }
-        });
-    });
+                        // Xóa style 'mặc định' khỏi tất cả các địa chỉ cũ trong popup
+                        if(addressList) {
+                            addressList.querySelectorAll('.address-item').forEach(item => {
+                                item.style.borderColor = '#ddd';
+                                item.style.backgroundColor = 'transparent';
+                                const radio = item.querySelector('input[type="radio"]');
+                                if(radio) radio.checked = false;
+                            });
+                        }
+                        
+                        // Thêm style 'mặc định' cho địa chỉ mới và check radio
+                        newAddressElement.style.borderColor = '#c21b1b';
+                        newAddressElement.style.backgroundColor = '#fff6f6';
+                        const newRadio = newAddressElement.querySelector('input[type="radio"]');
+if(newRadio) newRadio.checked = true;
 
-    // === SCRIPT XỬ LÝ ĐẶT HÀNG AJAX (GIỮ NGUYÊN) ===
-    const checkoutForm = document.getElementById('checkoutForm');
-    const popup = document.getElementById('orderSuccessPopup');
-    checkoutForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        const csrfToken = this.querySelector('input[name="_token"]').value;
-        try {
-            const response = await fetch(this.action, {
-                method: 'POST',
-                headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken},
-                body: formData
+                        // Thêm địa chỉ mới vào cuối danh sách trong popup
+                        if(addressList) addressList.appendChild(newAddressElement);
+                        // 🔹 KẾT THÚC SỬA LỖI 🔹
+
+                        fetch("{{ route('address.setDefault') }}", {
+                            method: "POST",
+                            headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}", "Content-Type": "application/json" },
+                            body: JSON.stringify({ address_id: addr.id })
+                        });
+                        
+                        this.reset();
+                        this.style.display = 'none';
+                        addressModal.style.display = 'none';
+                    } else {
+                        alert(data.message || 'Không thể thêm địa chỉ mới.');
+                    }
+                } catch (error) {
+                    console.error('Lỗi khi thêm địa chỉ:', error);
+                    alert('Lỗi kết nối máy chủ khi thêm địa chỉ.');
+                }
             });
-            const data = await response.json();
-            if (data.success) {
-                popup.style.display = 'flex';
-            } else {
-                alert('Có lỗi xảy ra khi đặt hàng: ' + (data.message || ''));
-            }
-        } catch (error) {
-            console.error('Lỗi:', error);
-            alert('Không thể kết nối máy chủ.');
         }
-    });
 
-    // === SCRIPT MỚI: XỬ LÝ KHUYẾN MÃI VÀ CẬP NHẬT GIÁ ===
-    const promotionSelect = document.getElementById('promotionSelect');
+        if (addressList) {
+            addressList.addEventListener('change', (e) => {
+                if (e.target.name === 'selected_address') {
+                    const label = e.target.closest('.address-item');
+                    if (!label) return;
+
+                    const id = label.dataset.id;
+                    const fullname = label.dataset.fullname;
+                    const phone = label.dataset.phone;
+                    const address = label.dataset.address;
+                    
+                    renderSelectedAddress(fullname, phone, address);
+                    
+                    fetch("{{ route('address.setDefault') }}", {
+                        method: "POST",
+                        headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}", "Content-Type": "application/json" },
+                        body: JSON.stringify({ address_id: id })
+                    });
+                    
+                    addressModal.style.display = 'none';
+                }
+            });
+        }
+    }
+
+    // --- LOGIC THANH TOÁN QR ---
+    if (qrSection && paymentRadios.length > 0) {
+        paymentRadios.forEach(radio => {
+            radio.addEventListener("change", () => {
+                const method = radio.value;
+                if(paymentMethodInput) paymentMethodInput.value = method;
+                if (method === "bank") {
+                    qrSection.style.display = "block";
+                    qrSection.querySelector('#qrImage').src = "{{ asset('assets/img/qr_bank.webp') }}";
+                    qrSection.querySelector('#qrNote').textContent = "Quét mã QR để chuyển khoản ngân hàng.";
+                } else if (method === "momo") {
+                    qrSection.style.display = "block";
+                    qrSection.querySelector('#qrImage').src = "{{ asset('assets/img/qr_momo.webp') }}";
+                    qrSection.querySelector('#qrNote').textContent = "Quét mã QR để thanh toán qua Ví MoMo / ZaloPay.";
+                } else {
+                    qrSection.style.display = "none";
+                }
+            });
+        });
+    }
+
+    // --- LOGIC XỬ LÝ KHUYẾN MÃI VÀ CẬP NHẬT GIÁ ---
     if (promotionSelect) {
-        const promotionIdInput = document.getElementById('promotionIdInput');
         const discountRow = document.getElementById('discountRow');
-        const discountValueElement = document.getElementById('discountValue');
-        const finalTotalValueElement = document.getElementById('finalTotalValue');
+        const discountValueEl = document.getElementById('discountValue');
+        const finalTotalValueEl = document.getElementById('finalTotalValue');
         const subtotal = {{ $total ?? 0 }};
 
         promotionSelect.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const discountPercent = parseFloat(selectedOption.getAttribute('data-discount')) || 0;
-            const promotionId = selectedOption.value;
+            const selectedOpt = this.options[this.selectedIndex];
+            const discountPercent = parseFloat(selectedOpt.dataset.discount) || 0;
+            if(promotionIdInput) promotionIdInput.value = selectedOpt.value;
 
-            // Cập nhật input ẩn để gửi đi cùng form
-            promotionIdInput.value = promotionId;
+            const discountAmount = subtotal * (discountPercent / 100);
+            const finalTotal = subtotal - discountAmount;
 
             if (discountPercent > 0) {
-                const discountAmount = subtotal * (discountPercent / 100);
-                const finalTotal = subtotal - discountAmount;
-
-                // Cập nhật giao diện
-                discountValueElement.textContent = `- ${Math.round(discountAmount).toLocaleString('vi-VN')}₫`;
-                finalTotalValueElement.textContent = `${Math.round(finalTotal).toLocaleString('vi-VN')}₫`;
-                discountRow.hidden = false;
+                if(discountValueEl) discountValueEl.textContent = `- ${Math.round(discountAmount).toLocaleString('vi-VN')}₫`;
+                if(finalTotalValueEl) finalTotalValueEl.textContent = `${Math.round(finalTotal).toLocaleString('vi-VN')}₫`;
+                if(discountRow) discountRow.hidden = false;
             } else {
-                // Nếu chọn "Không sử dụng"
-                discountValueElement.textContent = `0₫`;
-                finalTotalValueElement.textContent = `${subtotal.toLocaleString('vi-VN')}₫`;
-                discountRow.hidden = true;
+                if(discountValueEl) discountValueEl.textContent = '0₫';
+                if(finalTotalValueEl) finalTotalValueEl.textContent = `${subtotal.toLocaleString('vi-VN')}₫`;
+                if(discountRow) discountRow.hidden = true;
+            }
+        });
+    }
+
+    // --- LOGIC ĐẶT HÀNG AJAX ---
+    if (checkoutForm) {
+        checkoutForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': formData.get('_token')},
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.success) {
+                    if(successPopup) successPopup.style.display = 'flex';
+                } else {
+                    alert('Có lỗi xảy ra: ' + (data.message || 'Vui lòng thử lại.'));
+                }
+            } catch (error) {
+                console.error('Lỗi khi đặt hàng:', error);
+                alert('Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại đường truyền.');
             }
         });
     }
@@ -361,3 +448,4 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 @endsection
+

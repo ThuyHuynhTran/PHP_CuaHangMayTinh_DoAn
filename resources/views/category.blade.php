@@ -13,6 +13,7 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
             @foreach($products as $product)
                 <div style="border:1px solid #ddd; border-radius:10px; padding:10px; text-align:center; transition: all 0.2s ease;">
+                    
                     <!-- Ảnh sản phẩm -->
                     <img src="{{ asset('assets/img/' . ($product->duong_dan ?? 'default.jpg')) }}" 
                          alt="{{ $product->ten_sp ?? 'Sản phẩm' }}" 
@@ -22,9 +23,13 @@
                     <h4 style="margin:10px 0; color:#0b2c80;">{{ $product->ten_sp }}</h4>
 
                     <!-- Giá sản phẩm -->
-                    <p style="color:#c21b1b; font-weight:bold;">
-                        {{ number_format((float)$product->gia, 0, ',', '.') }}₫
-                    </p>
+                   
+                   
+<p style="color:#c21b1b; font-weight:bold;">
+    {{ number_format((float) str_replace(',', '', $product->gia), 0, ',', '.') }}₫
+</p>
+
+
 
                     <!-- Nút xem chi tiết -->
                     <a href="{{ route('product.detail', $product->id) }}" 

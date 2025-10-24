@@ -10,19 +10,27 @@ class Promotion extends Model
     use HasFactory;
 
     /**
-     * Các cột được phép gán dữ liệu hàng loạt.
+     * 🧩 Tên bảng tương ứng trong cơ sở dữ liệu.
+     * (Không bắt buộc nếu Laravel tự nhận đúng tên số nhiều)
      */
-    // app/Models/Promotion.php
-protected $fillable = [
-    'title',
-    'content',
-    'discount_percent', // Thêm vào đây
-    'start_date',       // Thêm vào đây
-    'end_date',         // Thêm vào đây
-];
+    protected $table = 'promotions';
 
-protected $casts = [
-    'start_date' => 'datetime', // Ép kiểu để dễ xử lý
-    'end_date'   => 'datetime', // Ép kiểu để dễ xử lý
-];
+    /**
+     * 🛠️ Các cột được phép gán dữ liệu hàng loạt.
+     */
+    protected $fillable = [
+        'title',
+        'description',
+        'discount_percent',
+        'start_date',
+        'end_date',
+    ];
+
+    /**
+     * 📅 Ép kiểu cho các cột thời gian để dễ xử lý bằng Carbon.
+     */
+    protected $casts = [
+        'start_date' => 'datetime',
+        'end_date'   => 'datetime',
+    ];
 }

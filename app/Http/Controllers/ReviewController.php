@@ -2,83 +2,152 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DienThoai;
 use App\Models\Review;
-use App\Models\ReviewImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ReviewController extends Controller
 {
     /**
-     * ✅ Lưu hoặc cập nhật đánh giá sản phẩm (có kèm ảnh)
+     * Lưu một đánh giá mới.
      */
     public function store(Request $request)
-{
-    $request->validate([
-        'product_id' => 'required|exists:dien_thoais,id',
-        'rating' => 'required|integer|min:1|max:5',
-        'comment' => 'nullable|string|max:1000',
-        'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
-    ]);
+    {
+        $request->validate([
+            'product_id' => 'required|exists:dien_thoais,id',
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string',
+            'images' => 'nullable|array|max:3', // ✅ Đảm bảo Laravel hiểu đây là mảng ảnh
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-    $userId = Auth::id();
-    $productId = $request->product_id;
+        $userId = Auth::id();
+        $productId = $request->product_id;
 
-    // ✅ Kiểm tra người dùng đã mua và đơn hàng đã giao
-    $hasPurchased = \App\Models\OrderItem::whereHas('order', function ($q) use ($userId) {
-            $q->where('user_id', $userId)
-              ->where('status', 'Đã giao');
-        })
-        ->where('product_id', $productId)
-        ->exists();
+        // ✅ KIỂM TRA QUYỀN ĐÁNH GIÁ: User phải mua hàng và đơn hàng phải ở trạng thái "Đã giao"
+        $hasPurchasedAndDelivered = \App\Models\OrderItem::where('product_id', $productId)
+            ->whereHas('order', function ($query) use ($userId) {
+                $query->where('user_id', $userId)->where('status', 'Đã giao');
+            })
+            ->exists();
 
-    if (!$hasPurchased) {
-        return back()->with('error', '⚠️ Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng.');
-    }
-
-    // ✅ Kiểm tra đã từng đánh giá chưa
-    $alreadyReviewed = Review::where('user_id', $userId)
-        ->where('product_id', $productId)
-        ->exists();
-
-    if ($alreadyReviewed) {
-        return back()->with('error', '⚠️ Bạn đã đánh giá sản phẩm này rồi.');
-    }
-
-    // ✅ Tạo mới review
-    $review = Review::create([
-        'user_id' => $userId,
-        'product_id' => $productId,
-        'rating' => $request->rating,
-        'comment' => $request->comment,
-    ]);
-
-    // ✅ Lưu ảnh nếu có
-    if ($request->hasFile('images')) {
-        foreach ($request->file('images') as $image) {
-            $path = $image->store('reviews', 'public');
-            \App\Models\ReviewImage::create([
-                'review_id' => $review->id,
-                'path' => $path,
-            ]);
+        if (!$hasPurchasedAndDelivered) {
+            return redirect()->back()->with('status', 'Bạn chỉ có thể đánh giá sản phẩm sau khi đã nhận hàng thành công.');
         }
+
+        // ✅ KIỂM TRA XEM ĐÃ TỒN TẠI ĐÁNH GIÁ CHƯA
+        $existingReview = Review::where('user_id', $userId)->where('product_id', $productId)->first();
+        if ($existingReview) {
+             return redirect()->back()->with('status', 'Bạn đã đánh giá sản phẩm này rồi.');
+        }
+
+        // ✅ TẠO ĐÁNH GIÁ MỚI
+        $review = Review::create([
+            'user_id' => $userId,
+            'product_id' => $productId,
+            'rating' => $request->rating,
+            'comment' => $request->comment,
+        ]);
+
+        // ✅ LƯU NHIỀU ẢNH (tối đa 3)
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                if ($image->isValid()) {
+                    $path = $image->store('reviews', 'public');
+                    $review->images()->create(['path' => $path]);
+                }
+            }
+        }
+
+        return redirect()->back()->with('status', 'Cảm ơn bạn đã đánh giá sản phẩm!');
     }
 
-    return back()->with('success', '🎉 Cảm ơn bạn đã đánh giá sản phẩm!');
+    /**
+     * Lấy dữ liệu của một đánh giá để chỉnh sửa.
+     */
+    public function edit(Review $review)
+    {
+        // Chính sách bảo mật: Chỉ chủ nhân của đánh giá mới có quyền xem để sửa
+        if (Auth::id() !== $review->user_id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        return response()->json($review->load('images'));
+    }
+
+    /**
+     * Cập nhật một đánh giá đã có.
+     */
+    public function update(Request $request, Review $review)
+    {
+        // Chính sách bảo mật: Chỉ chủ nhân của đánh giá mới có quyền sửa
+        if (Auth::id() !== $review->user_id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string',
+            'images' => 'nullable|array|max:3', // ✅ validate mảng ảnh
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $review->update([
+            'rating' => $request->rating,
+            'comment' => $request->comment,
+        ]);
+
+        // ✅ Xử lý cập nhật ảnh (xóa ảnh cũ, thêm ảnh mới)
+        if ($request->hasFile('images')) {
+            // Xóa ảnh cũ
+            foreach ($review->images as $image) {
+                Storage::disk('public')->delete($image->path);
+                $image->delete();
+            }
+
+            // Thêm ảnh mới
+            foreach ($request->file('images') as $image) {
+                if ($image->isValid()) {
+                    $path = $image->store('reviews', 'public');
+                    $review->images()->create(['path' => $path]);
+                }
+            }
+        }
+
+        return redirect()->back()->with('status', 'Cập nhật đánh giá thành công!');
+    }
+ public function toggleLike(Review $review)
+{
+    $userId = Auth::id();
+
+    $liked = \DB::table('review_likes')
+        ->where('review_id', $review->id)
+        ->where('user_id', $userId)
+        ->exists();
+
+    if ($liked) {
+        \DB::table('review_likes')
+            ->where('review_id', $review->id)
+            ->where('user_id', $userId)
+            ->delete();
+        $isLiked = false;
+    } else {
+        \DB::table('review_likes')->insert([
+            'review_id' => $review->id,
+            'user_id' => $userId,
+            'created_at' => now(),
+        ]);
+        $isLiked = true;
+    }
+
+    $likesCount = \DB::table('review_likes')->where('review_id', $review->id)->count();
+
+    return response()->json([
+        'likes' => $likesCount,
+        'liked' => $isLiked
+    ]);
 }
 
 
-    /**
-     * 🧾 Hiển thị chi tiết sản phẩm kèm đánh giá
-     */
-    public function show($id)
-    {
-        $product = DienThoai::with([
-            'reviews.user',     // người viết đánh giá
-            'reviews.images',   // ảnh trong đánh giá
-        ])->findOrFail($id);
-
-        return view('product_detail', compact('product'));
-    }
 }
